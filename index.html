@@ -105,11 +105,11 @@ tr:hover td { background: #fafaf8; }
 
   <div class="charts-row">
     <div class="chart-card">
-      <div class="chart-title">Доход vs расход ₽</div>
+      <div class="chart-title">Вывели vs потратили ₽</div>
       <div style="position:relative;height:180px"><canvas id="cBalRub"></canvas></div>
     </div>
     <div class="chart-card">
-      <div class="chart-title">Доход vs расход ₫</div>
+      <div class="chart-title">Вывели vs потратили ₫</div>
       <div style="position:relative;height:180px"><canvas id="cBalVnd"></canvas></div>
     </div>
   </div>
@@ -254,14 +254,14 @@ function renderMetrics() {
   const pos = '#1D9E75', neg = '#E24B4A';
 
   const items = [
-    ['Доход ₽', Math.round(incRub).toLocaleString('ru') + ' ₽', ''],
-    ['Доход $', Math.round(incUsd).toLocaleString('ru') + ' $', ''],
+    ['Вывели ₽', Math.round(incRub).toLocaleString('ru') + ' ₽', ''],
+    ['Вывели $', Math.round(incUsd).toLocaleString('ru') + ' $', ''],
     ['Кэш получено ₫', Math.round(cashVnd/1000).toLocaleString('ru') + 'к ₫', ''],
-    ['Расход ₽', Math.round(expRub).toLocaleString('ru') + ' ₽', ''],
-    ['Расход ₫', Math.round(expVnd/1000).toLocaleString('ru') + 'к ₫', ''],
-    ['Расход $', Math.round(expUsd).toLocaleString('ru') + ' $', ''],
-    ['Баланс ₽', Math.round(balRub).toLocaleString('ru') + ' ₽', balRub>=0?pos:neg],
-    ['Баланс ₫', Math.round(balVnd/1000).toLocaleString('ru') + 'к ₫', balVnd>=0?pos:neg],
+    ['Потратили ₽', Math.round(expRub).toLocaleString('ru') + ' ₽', ''],
+    ['Потратили ₫', Math.round(expVnd/1000).toLocaleString('ru') + 'к ₫', ''],
+    ['Потратили $', Math.round(expUsd).toLocaleString('ru') + ' $', ''],
+    ['Остаток ₽', Math.round(balRub).toLocaleString('ru') + ' ₽', balRub>=0?pos:neg],
+    ['Остаток ₫', Math.round(balVnd/1000).toLocaleString('ru') + 'к ₫', balVnd>=0?pos:neg],
   ];
   document.getElementById('metrics').innerHTML = items.map(([l,v,c]) =>
     `<div class="metric"><div class="metric-label">${l}</div><div class="metric-val"${c?` style="color:${c}"`:''}>${v}</div></div>`
@@ -311,7 +311,7 @@ function renderBalChart(canvasId, curr) {
   const exp = sum(filtered,'расход',curr);
   const div = curr==='VND'?1000:1;
   const suf = curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
-  mkChart(canvasId,'bar',['Доход','Расход'],[{
+  mkChart(canvasId,'bar',['Вывели','Потратили'],[{
     data:[Math.round(inc/div),Math.round(exp/div)],
     backgroundColor:['#1D9E75','#E24B4A'],
     borderRadius:6, borderWidth:0
