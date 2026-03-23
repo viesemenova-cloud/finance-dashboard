@@ -3,62 +3,121 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Финансы — дашборд</title>
+<title>Личные финансы</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
-.header { background: #fff; border-bottom: 1px solid #e5e5e3; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
-.header h1 { font-size: 17px; font-weight: 500; }
-.header-sub { font-size: 13px; color: #888; }
-.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
-.filters { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.filters label { font-size: 13px; color: #666; }
-.filters input, .filters select { font-size: 13px; border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; background: #fafaf8; color: #1a1a1a; outline: none; }
-.filters input:focus, .filters select:focus { border-color: #888; }
-.btn { font-size: 13px; border: 1px solid #ddd; border-radius: 8px; padding: 6px 14px; background: #fafaf8; color: #1a1a1a; cursor: pointer; transition: background 0.15s; }
-.btn:hover { background: #f0f0ee; }
-.btn-refresh { background: #1D9E75; color: #fff; border-color: #1D9E75; }
-.btn-refresh:hover { background: #0F6E56; }
-.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
-.metric { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 14px 16px; }
-.metric-label { font-size: 12px; color: #888; margin-bottom: 4px; }
-.metric-val { font-size: 22px; font-weight: 500; }
-.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.chart-card { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 16px; }
-.chart-title { font-size: 13px; font-weight: 500; color: #666; margin-bottom: 10px; }
-.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; font-size: 11px; color: #666; }
+:root {
+  --cherry: #8B1A1A;
+  --cherry-mid: #C43333;
+  --cherry-light: #F5EAEA;
+  --blue: #2A6496;
+  --blue-light: #E8F2FA;
+  --stone: #F0EDE7;
+  --stone-card: #FAFAF8;
+  --stone-dark: #D8D3CA;
+  --stone-text: #6B6560;
+  --black: #1A1A1A;
+  --gray: #888780;
+}
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--stone); color: var(--black); min-height: 100vh; }
+
+.header { background: var(--cherry); padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; }
+.header-left h1 { font-size: 18px; font-weight: 500; color: #fff; }
+.header-left p { font-size: 12px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.header-right { display: flex; gap: 8px; }
+.btn { font-size: 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 7px 14px; background: rgba(255,255,255,0.12); color: #fff; cursor: pointer; transition: background 0.15s; }
+.btn:hover { background: rgba(255,255,255,0.22); }
+.btn-stone { background: #fff; color: var(--cherry); border-color: #fff; font-weight: 500; }
+.btn-stone:hover { background: var(--cherry-light); }
+
+.container { max-width: 1140px; margin: 0 auto; padding: 24px 16px; }
+
+.filters { background: #fff; border-radius: 12px; border: 1px solid var(--stone-dark); padding: 14px 18px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters label { font-size: 12px; color: var(--stone-text); }
+.filters input, .filters select { font-size: 12px; border: 1px solid var(--stone-dark); border-radius: 7px; padding: 5px 9px; background: var(--stone); color: var(--black); outline: none; }
+.filters input:focus, .filters select:focus { border-color: var(--blue); }
+.filter-btn { font-size: 12px; border-radius: 7px; padding: 5px 13px; cursor: pointer; border: 1px solid var(--stone-dark); background: var(--stone); color: var(--black); transition: background 0.15s; }
+.filter-btn:hover { background: var(--stone-dark); }
+.filter-btn-apply { background: var(--cherry); color: #fff; border-color: var(--cherry); }
+.filter-btn-apply:hover { background: var(--cherry-mid); }
+
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.metric { background: #fff; border-radius: 11px; border: 1px solid var(--stone-dark); padding: 13px 15px; }
+.metric-label { font-size: 11px; color: var(--stone-text); margin-bottom: 4px; }
+.metric-val { font-size: 19px; font-weight: 500; color: var(--black); }
+.metric-val.pos { color: #1A6B43; }
+.metric-val.neg { color: var(--cherry); }
+.metric.accent-cherry { border-left: 3px solid var(--cherry); padding-left: 12px; }
+.metric.accent-blue { border-left: 3px solid var(--blue); padding-left: 12px; }
+.metric.accent-gray { border-left: 3px solid var(--gray); padding-left: 12px; }
+
+.section-title { font-size: 11px; font-weight: 500; color: var(--cherry); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
+.section-title::before { content: ''; display: block; width: 3px; height: 13px; background: var(--cherry); border-radius: 2px; }
+
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.card { background: #fff; border-radius: 13px; border: 1px solid var(--stone-dark); padding: 16px; }
+.card-title { font-size: 12px; font-weight: 500; color: var(--stone-text); margin-bottom: 10px; }
+.legend { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; font-size: 11px; color: var(--stone-text); }
 .legend span { display: flex; align-items: center; gap: 4px; }
-.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
-.table-card { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 16px; }
-.table-title { font-size: 13px; font-weight: 500; color: #666; margin-bottom: 12px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { text-align: left; font-weight: 500; color: #888; font-size: 11px; padding: 5px 8px; border-bottom: 1px solid #eee; }
-td { padding: 7px 8px; border-bottom: 1px solid #f0f0ee; color: #1a1a1a; }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: #fafaf8; }
-.pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
-.pill-vnd { background: #E1F5EE; color: #0F6E56; }
-.pill-rub { background: #E6F1FB; color: #185FA5; }
-.pill-usd { background: #FAEEDA; color: #854F0B; }
-.pill-type { background: #f0f0ee; color: #555; }
-.status { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
-.err { color: #E24B4A; }
-.updated { font-size: 12px; color: #aaa; }
+.legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+.cat-section { background: #fff; border-radius: 13px; border: 1px solid var(--stone-dark); padding: 18px; margin-bottom: 14px; }
+.three-col { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 20px; }
+.col-head { font-size: 11px; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.col-head.ch { color: var(--cherry); }
+.col-head.ch::before { content:''; display:block; width:3px; height:11px; background:var(--cherry); border-radius:2px; }
+.col-head.bl { color: var(--blue); }
+.col-head.bl::before { content:''; display:block; width:3px; height:11px; background:var(--blue); border-radius:2px; }
+.col-head.gr { color: var(--gray); }
+.col-head.gr::before { content:''; display:block; width:3px; height:11px; background:var(--gray); border-radius:2px; }
+
+.cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.cat-table th { text-align: left; font-weight: 500; color: var(--stone-text); font-size: 10px; padding: 3px 6px; border-bottom: 1px solid var(--stone-dark); }
+.cat-table th:last-child { text-align: right; }
+.cat-table td { padding: 5px 6px; border-bottom: 1px solid var(--stone); color: var(--black); }
+.cat-table td:last-child { text-align: right; font-weight: 500; }
+.cat-table tr:last-child td { border-bottom: none; }
+.total-row td { font-weight: 500; border-top: 1px solid var(--stone-dark) !important; border-bottom: none !important; }
+.total-row.ch td { color: var(--cherry); }
+.total-row.bl td { color: var(--blue); }
+.total-row.gr td { color: var(--gray); }
+
+.tx-section { background: #fff; border-radius: 13px; border: 1px solid var(--stone-dark); padding: 16px; }
+.tx-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tx-table th { text-align: left; font-weight: 500; color: var(--stone-text); font-size: 10px; padding: 4px 8px; border-bottom: 1px solid var(--stone-dark); }
+.tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--stone); color: var(--black); }
+.tx-table tr:last-child td { border-bottom: none; }
+.tx-table tr:hover td { background: var(--stone); }
+.pill { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 9px; font-weight: 500; }
+.pill-vnd { background: #E8F5EE; color: #1A6B43; }
+.pill-rub { background: var(--cherry-light); color: var(--cherry); }
+.pill-usd { background: var(--blue-light); color: var(--blue); }
+.pill-type { background: var(--stone); color: var(--gray); }
+.status { text-align: center; padding: 3rem; color: var(--stone-text); font-size: 13px; }
+.err { color: var(--cherry); }
+
+.blue-band { background: var(--blue-light); border: 1px solid #BDD5EA; border-radius: 11px; padding: 12px 16px; margin-bottom: 14px; display: flex; gap: 20px; flex-wrap: wrap; }
+.blue-band-item { font-size: 12px; color: var(--blue); }
+.blue-band-item strong { font-size: 16px; font-weight: 500; display: block; color: var(--black); }
+
 @media (max-width: 640px) {
   .charts-row { grid-template-columns: 1fr; }
-  .header h1 { font-size: 15px; }
+  .three-col { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div>
+  <div class="header-left">
     <h1>Личные финансы</h1>
-    <div class="header-sub updated" id="lastUpdated">Загрузка...</div>
+    <p id="lastUpdated">Загрузка...</p>
   </div>
-  <button class="btn btn-refresh" onclick="loadData()">↻ Обновить</button>
+  <div class="header-right">
+    <button class="btn" onclick="loadData()">↻ Обновить</button>
+  </div>
 </div>
 
 <div class="container">
@@ -72,9 +131,9 @@ tr:hover td { background: #fafaf8; }
     <select id="whoFilter"><option value="">Все</option></select>
     <select id="currFilter">
       <option value="">Все валюты</option>
-      <option value="VND">VND ₫</option>
-      <option value="RUB">RUB ₽</option>
-      <option value="USDT">USDT $</option>
+      <option value="VND">₫ донги</option>
+      <option value="RUB">₽ рубли</option>
+      <option value="USDT">$ USDT</option>
     </select>
     <select id="typeFilter">
       <option value="">Все типы</option>
@@ -82,85 +141,63 @@ tr:hover td { background: #fafaf8; }
       <option value="приход">Приход</option>
       <option value="кэш">Кэш</option>
     </select>
-    <button class="btn" onclick="applyFilters()">Применить</button>
-    <button class="btn" onclick="resetFilters()">Сброс</button>
+    <button class="filter-btn filter-btn-apply" onclick="applyFilters()">Применить</button>
+    <button class="filter-btn" onclick="resetFilters()">Сброс</button>
   </div>
 
   <div class="metrics" id="metrics">
-    <div class="status">Загрузка данных...</div>
+    <div class="status">Загрузка...</div>
   </div>
 
   <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title">Расходы по категориям ₫</div>
+    <div class="card">
+      <div class="card-title">Расходы по категориям ₫</div>
       <div class="legend" id="leg-vnd"></div>
-      <div style="position:relative;height:220px"><canvas id="cCatVnd"></canvas></div>
+      <div style="position:relative;height:200px"><canvas id="cCatVnd"></canvas></div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">Расходы по категориям ₽</div>
+    <div class="card">
+      <div class="card-title">Расходы по категориям ₽</div>
       <div class="legend" id="leg-rub"></div>
-      <div style="position:relative;height:220px"><canvas id="cCatRub"></canvas></div>
+      <div style="position:relative;height:200px"><canvas id="cCatRub"></canvas></div>
+    </div>
+  </div>
+
+  <div class="cat-section">
+    <div class="section-title">Итоги по категориям</div>
+    <div class="three-col">
+      <div>
+        <div class="col-head ch">Расходы ₫</div>
+        <table class="cat-table"><thead><tr><th>Категория</th><th>Сумма</th></tr></thead><tbody id="catVndBody"></tbody></table>
+      </div>
+      <div>
+        <div class="col-head bl">Расходы ₽</div>
+        <table class="cat-table"><thead><tr><th>Категория</th><th>Сумма</th></tr></thead><tbody id="catRubBody"></tbody></table>
+      </div>
+      <div>
+        <div class="col-head gr">Расходы $</div>
+        <table class="cat-table"><thead><tr><th>Категория</th><th>Сумма</th></tr></thead><tbody id="catUsdBody"></tbody></table>
+      </div>
     </div>
   </div>
 
   <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title">Вывели vs потратили ₽</div>
+    <div class="card">
+      <div class="card-title">Вывели vs потратили ₽</div>
       <div style="position:relative;height:180px"><canvas id="cBalRub"></canvas></div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">Вывели vs потратили ₫</div>
+    <div class="card">
+      <div class="card-title">Вывели vs потратили ₫</div>
       <div style="position:relative;height:180px"><canvas id="cBalVnd"></canvas></div>
     </div>
   </div>
 
-  <div class="charts-row">
-    <div class="chart-card">
-      <div class="chart-title">Расходы по категориям $ (USDT)</div>
-      <div class="legend" id="leg-usd"></div>
-      <div style="position:relative;height:180px"><canvas id="cCatUsd"></canvas></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title">Доход vs расход $ (USDT)</div>
-      <div style="position:relative;height:180px"><canvas id="cBalUsd"></canvas></div>
-    </div>
-  </div>
-
-  <div class="table-card" style="margin-bottom:16px">
-    <div class="table-title">Итоги по категориям</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
-      <div>
-        <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:500">Расходы ₫</div>
-        <table><thead><tr><th>Категория</th><th style="text-align:right">Сумма</th></tr></thead><tbody id="catVndBody"></tbody></table>
-      </div>
-      <div>
-        <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:500">Расходы ₽</div>
-        <table><thead><tr><th>Категория</th><th style="text-align:right">Сумма</th></tr></thead><tbody id="catRubBody"></tbody></table>
-      </div>
-      <div>
-        <div style="font-size:12px;color:#888;margin-bottom:8px;font-weight:500">Расходы $</div>
-        <table><thead><tr><th>Категория</th><th style="text-align:right">Сумма</th></tr></thead><tbody id="catUsdBody"></tbody></table>
-      </div>
-    </div>
-  </div>
-
-  <div class="table-card">
-    <div class="table-title">
-      Все транзакции <span id="txCount" style="font-weight:400;color:#aaa"></span>
+  <div class="tx-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:0">Все транзакции <span id="txCount" style="font-weight:400;color:var(--gray);font-size:11px;text-transform:none;letter-spacing:0"></span></div>
     </div>
     <div style="overflow-x:auto">
-      <table>
-        <thead>
-          <tr>
-            <th>Дата</th>
-            <th>Кто</th>
-            <th>Тип</th>
-            <th style="text-align:right">Сумма</th>
-            <th>Валюта</th>
-            <th>Категория</th>
-            <th>Комментарий</th>
-          </tr>
-        </thead>
+      <table class="tx-table">
+        <thead><tr><th>Дата</th><th>Кто</th><th>Тип</th><th style="text-align:right">Сумма</th><th>Валюта</th><th>Категория</th><th>Комментарий</th></tr></thead>
         <tbody id="txBody"></tbody>
       </table>
     </div>
@@ -170,10 +207,11 @@ tr:hover td { background: #fafaf8; }
 
 <script>
 const SHEET_ID = '1fyExlrroNUS6idq5VyWyl7_CHAaYyGBGVJAiTUzQVSk';
-const SHEET_NAME = 'Транзакции';
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('Транзакции')}`;
 
-const COLORS = ['#1D9E75','#378ADD','#D85A30','#D4537E','#BA7517','#534AB7','#639922','#E24B4A','#5DCAA5','#7F77DD','#EF9F27','#F09595'];
+const COLORS_CHERRY = ['#8B1A1A','#C43333','#E07070','#F5C2C2','#5C1111','#A52A2A','#D4706F'];
+const COLORS_BLUE   = ['#2A6496','#4A90C4','#7BB8D4','#BDD5EA','#1A4A70','#3A7AB0','#5FA0CC'];
+const COLORS_MIX    = ['#8B1A1A','#2A6496','#888780','#C43333','#4A90C4','#B4B2A9','#5C1111','#1A4A70','#444441'];
 
 let allData = [], filtered = [], charts = {};
 
@@ -181,8 +219,7 @@ function parseCSV(text) {
   const rows = [];
   const lines = text.trim().split('\n').slice(1);
   for (const line of lines) {
-    const cols = [];
-    let cur = '', inQ = false;
+    const cols = []; let cur = '', inQ = false;
     for (let i = 0; i < line.length; i++) {
       const c = line[i];
       if (c === '"') { inQ = !inQ; continue; }
@@ -202,49 +239,43 @@ async function loadData() {
     const res = await fetch(CSV_URL);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const text = await res.text();
-    const rows = parseCSV(text);
-    allData = rows.map(r => ({
-      date: (r[0]||'').slice(0,10),
-      datetime: r[0]||'',
-      who: r[1]||'',
-      type: r[2]||'',
+    allData = parseCSV(text).map(r => ({
+      date: (r[0]||'').slice(0,10), datetime: r[0]||'',
+      who: r[1]||'', type: r[2]||'',
       amount: parseFloat((r[3]||'0').replace(/[\s\u00a0]/g,'').replace(',','.')) || 0,
-      currency: r[4]||'',
-      category: r[5]||'',
-      comment: r[6]||''
+      currency: r[4]||'', category: r[5]||'', comment: r[6]||''
     })).filter(r => r.date && r.amount > 0);
-
     populateFilters();
     filtered = [...allData];
     render();
     document.getElementById('lastUpdated').textContent = 'Обновлено: ' + new Date().toLocaleString('ru');
   } catch(e) {
-    document.getElementById('metrics').innerHTML = `<div class="status err">Ошибка загрузки: ${e.message}<br><br>Убедись что таблица открыта для всех по ссылке:<br>Файл → Поделиться → Все у кого есть ссылка → Читатель</div>`;
+    document.getElementById('metrics').innerHTML = `<div class="status err">Ошибка: ${e.message}<br>Убедись что таблица открыта для всех по ссылке</div>`;
     document.getElementById('lastUpdated').textContent = 'Ошибка загрузки';
   }
 }
 
 function populateFilters() {
-  const cats = [...new Set(allData.map(r => r.category))].filter(Boolean).sort();
-  const whos = [...new Set(allData.map(r => r.who))].filter(Boolean).sort();
+  const cats = [...new Set(allData.map(r=>r.category))].filter(Boolean).sort();
+  const whos = [...new Set(allData.map(r=>r.who))].filter(Boolean).sort();
   document.getElementById('catFilter').innerHTML = '<option value="">Все категории</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
   document.getElementById('whoFilter').innerHTML = '<option value="">Все</option>' + whos.map(w=>`<option value="${w}">${w}</option>`).join('');
 }
 
 function applyFilters() {
   const from = document.getElementById('dateFrom').value;
-  const to = document.getElementById('dateTo').value;
-  const cat = document.getElementById('catFilter').value;
-  const who = document.getElementById('whoFilter').value;
+  const to   = document.getElementById('dateTo').value;
+  const cat  = document.getElementById('catFilter').value;
+  const who  = document.getElementById('whoFilter').value;
   const curr = document.getElementById('currFilter').value;
   const type = document.getElementById('typeFilter').value;
   filtered = allData.filter(r => {
     if (from && r.date < from) return false;
-    if (to && r.date > to) return false;
-    if (cat && r.category !== cat) return false;
-    if (who && r.who !== who) return false;
+    if (to   && r.date > to)   return false;
+    if (cat  && r.category !== cat) return false;
+    if (who  && r.who !== who)      return false;
     if (curr && r.currency !== curr) return false;
-    if (type && r.type !== type) return false;
+    if (type && r.type !== type)     return false;
     return true;
   });
   render();
@@ -257,46 +288,46 @@ function resetFilters() {
 }
 
 function sum(data, type, curr) {
-  return data.filter(r => r.type === type && r.currency === curr).reduce((a,r) => a+r.amount, 0);
+  return data.filter(r=>r.type===type && r.currency===curr).reduce((a,r)=>a+r.amount,0);
+}
+
+function groupByCat(curr) {
+  const map = {};
+  filtered.filter(r=>r.type==='расход' && r.currency===curr).forEach(r=>{
+    map[r.category]=(map[r.category]||0)+r.amount;
+  });
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
 }
 
 function renderMetrics() {
   const incRub = sum(filtered,'приход','RUB');
   const incUsd = sum(filtered,'приход','USDT');
-  const cashVnd = sum(filtered,'кэш','VND');
+  const cashVnd= sum(filtered,'кэш','VND');
   const expRub = sum(filtered,'расход','RUB');
   const expVnd = sum(filtered,'расход','VND');
   const expUsd = sum(filtered,'расход','USDT');
   const balRub = incRub - expRub;
   const balVnd = cashVnd - expVnd;
-  const pos = '#1D9E75', neg = '#E24B4A';
 
-  const items = [
-    ['Вывели ₽', Math.round(incRub).toLocaleString('ru') + ' ₽', ''],
-    ['Вывели $', Math.round(incUsd).toLocaleString('ru') + ' $', ''],
-    ['Кэш получено ₫', Math.round(cashVnd/1000).toLocaleString('ru') + 'к ₫', ''],
-    ['Потратили ₽', Math.round(expRub).toLocaleString('ru') + ' ₽', ''],
-    ['Потратили ₫', Math.round(expVnd/1000).toLocaleString('ru') + 'к ₫', ''],
-    ['Потратили $', Math.round(expUsd).toLocaleString('ru') + ' $', ''],
-    ['Остаток ₽', Math.round(balRub).toLocaleString('ru') + ' ₽', balRub>=0?pos:neg],
-    ['Остаток ₫', Math.round(balVnd/1000).toLocaleString('ru') + 'к ₫', balVnd>=0?pos:neg],
-  ];
-  document.getElementById('metrics').innerHTML = items.map(([l,v,c]) =>
-    `<div class="metric"><div class="metric-label">${l}</div><div class="metric-val"${c?` style="color:${c}"`:''}>${v}</div></div>`
-  ).join('');
+  document.getElementById('metrics').innerHTML = [
+    ['Вывели ₽',       Math.round(incRub).toLocaleString('ru')+' ₽',        'accent-cherry', ''],
+    ['Вывели $',       Math.round(incUsd).toLocaleString('ru')+' $',         'accent-blue',   ''],
+    ['Кэш получено ₫', Math.round(cashVnd/1000).toLocaleString('ru')+'к ₫', 'accent-gray',   ''],
+    ['Потратили ₽',    Math.round(expRub).toLocaleString('ru')+' ₽',         'accent-cherry', ''],
+    ['Потратили ₫',    Math.round(expVnd/1000).toLocaleString('ru')+'к ₫',  'accent-gray',   ''],
+    ['Потратили $',    Math.round(expUsd).toLocaleString('ru')+' $',          'accent-blue',   ''],
+    ['Остаток ₽',      Math.round(balRub).toLocaleString('ru')+' ₽',         'accent-cherry', balRub>=0?'pos':'neg'],
+    ['Остаток ₫',      Math.round(balVnd/1000).toLocaleString('ru')+'к ₫',  'accent-gray',   balVnd>=0?'pos':'neg'],
+  ].map(([l,v,acc,cls])=>`
+    <div class="metric ${acc}">
+      <div class="metric-label">${l}</div>
+      <div class="metric-val ${cls}">${v}</div>
+    </div>`).join('');
 }
 
-function groupByCat(curr) {
-  const map = {};
-  filtered.filter(r => r.type==='расход' && r.currency===curr).forEach(r => {
-    map[r.category] = (map[r.category]||0) + r.amount;
-  });
-  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
-}
-
-function makeLegend(id, entries) {
+function makeLegend(id, entries, colors) {
   document.getElementById(id).innerHTML = entries.map((e,i)=>
-    `<span><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${e[0]}</span>`
+    `<span><span class="legend-dot" style="background:${colors[i%colors.length]}"></span>${e[0]}</span>`
   ).join('');
 }
 
@@ -306,70 +337,68 @@ function mkChart(id, type, labels, datasets, opts={}) {
   if (!ctx) return;
   charts[id] = new Chart(ctx, {
     type, data:{labels,datasets},
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, ...opts}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},...opts}
   });
 }
 
 function renderCatChart(canvasId, legId, curr) {
   const entries = groupByCat(curr);
-  makeLegend(legId, entries);
+  const colors = curr==='VND'?COLORS_CHERRY:curr==='RUB'?COLORS_BLUE:COLORS_MIX;
+  makeLegend(legId, entries, colors);
   const div = curr==='VND'?1000:1;
   const suf = curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
   mkChart(canvasId,'doughnut',entries.map(e=>e[0]),[{
-    data: entries.map(e=>Math.round(e[1]/div)),
-    backgroundColor: COLORS.slice(0,entries.length),
-    borderWidth:2, borderColor:'#fff'
-  }],{
-    plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString('ru')}${suf}`}}}
-  });
+    data:entries.map(e=>Math.round(e[1]/div)),
+    backgroundColor:colors.slice(0,entries.length),
+    borderWidth:2,borderColor:'#fff'
+  }],{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString('ru')}${suf}`}}}});
 }
 
 function renderBalChart(canvasId, curr) {
-  const inc = sum(filtered,'приход',curr) + (curr==='VND'?sum(filtered,'кэш',curr):0);
+  const inc = sum(filtered,'приход',curr)+(curr==='VND'?sum(filtered,'кэш',curr):0);
   const exp = sum(filtered,'расход',curr);
   const div = curr==='VND'?1000:1;
   const suf = curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
+  const colors = curr==='RUB'?['#8B1A1A','#2A6496']:['#1A6B43','#8B1A1A'];
   mkChart(canvasId,'bar',['Вывели','Потратили'],[{
     data:[Math.round(inc/div),Math.round(exp/div)],
-    backgroundColor:['#1D9E75','#E24B4A'],
-    borderRadius:6, borderWidth:0
+    backgroundColor:colors,borderRadius:6,borderWidth:0
   }],{
-    scales:{
-      y:{ticks:{font:{size:11}, callback:v=>v.toLocaleString('ru')+suf}},
-      x:{ticks:{font:{size:12}}}
-    },
-    plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${ctx.raw.toLocaleString('ru')}${suf}`}}}
+    scales:{y:{ticks:{font:{size:11},callback:v=>v.toLocaleString('ru')+suf}},x:{ticks:{font:{size:12}}}},
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.raw.toLocaleString('ru')}${suf}`}}}
   });
 }
 
 function renderCatTable() {
-  const renderBody = (bodyId, curr) => {
+  const doBody = (bodyId, curr, cls) => {
     const entries = groupByCat(curr);
-    const div = curr === "VND" ? 1000 : 1;
-    const suf = curr === "VND" ? "к ₫" : curr === "RUB" ? " ₽" : " $";
-    const total = entries.reduce((a, e) => a + e[1], 0);
-    document.getElementById(bodyId).innerHTML = entries.map(([cat, amt]) =>
-      "<tr><td>" + cat + "</td><td style='text-align:right;font-weight:500'>" + Math.round(amt/div).toLocaleString("ru") + suf + "</td></tr>"
-    ).join("") + (entries.length ? "<tr style='border-top:1px solid #e5e5e3'><td style='font-weight:500'>Итого</td><td style='text-align:right;font-weight:500;color:#1D9E75'>" + Math.round(total/div).toLocaleString("ru") + suf + "</td></tr>" : "<tr><td colspan='2' style='color:#aaa'>нет данных</td></tr>");
+    const div = curr==='VND'?1000:1;
+    const suf = curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
+    const total = entries.reduce((a,e)=>a+e[1],0);
+    document.getElementById(bodyId).innerHTML = entries.map(([cat,amt])=>
+      `<tr><td>${cat}</td><td>${Math.round(amt/div).toLocaleString('ru')}${suf}</td></tr>`
+    ).join('')+(entries.length
+      ?`<tr class="total-row ${cls}"><td>Итого</td><td>${Math.round(total/div).toLocaleString('ru')}${suf}</td></tr>`
+      :`<tr><td colspan="2" style="color:var(--stone-text);font-style:italic">нет данных</td></tr>`);
   };
-  renderBody("catVndBody", "VND");
-  renderBody("catRubBody", "RUB");
-  renderBody("catUsdBody", "USDT");
+  doBody('catVndBody','VND','ch');
+  doBody('catRubBody','RUB','bl');
+  doBody('catUsdBody','USDT','gr');
 }
 
 function renderTable() {
   const rows = [...filtered].reverse().slice(0,300);
   document.getElementById('txCount').textContent = `(${filtered.length})`;
-  const pill = {VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd'};
+  const pill={VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd'};
   document.getElementById('txBody').innerHTML = rows.map(r=>`
     <tr>
-      <td>${r.datetime.slice(0,16)}</td>
+      <td style="color:var(--stone-text)">${r.datetime.slice(0,16)}</td>
       <td>${r.who}</td>
       <td><span class="pill pill-type">${r.type}</span></td>
       <td style="text-align:right;font-weight:500">${Math.round(r.amount).toLocaleString('ru')}</td>
       <td><span class="pill ${pill[r.currency]||''}">${r.currency}</span></td>
       <td>${r.category}</td>
-      <td style="color:#888">${r.comment}</td>
+      <td style="color:var(--stone-text)">${r.comment}</td>
     </tr>`).join('');
 }
 
@@ -377,11 +406,9 @@ function render() {
   renderMetrics();
   renderCatChart('cCatVnd','leg-vnd','VND');
   renderCatChart('cCatRub','leg-rub','RUB');
-  renderCatChart('cCatUsd','leg-usd','USDT');
+  renderCatTable();
   renderBalChart('cBalRub','RUB');
   renderBalChart('cBalVnd','VND');
-  renderBalChart('cBalUsd','USDT');
-  renderCatTable();
   renderTable();
 }
 
