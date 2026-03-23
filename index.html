@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Финансы — дашборд</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f3; color: #1a1a1a; min-height: 100vh; }
+.header { background: #fff; border-bottom: 1px solid #e5e5e3; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { font-size: 17px; font-weight: 500; }
+.header-sub { font-size: 13px; color: #888; }
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+.filters { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filters label { font-size: 13px; color: #666; }
+.filters input, .filters select { font-size: 13px; border: 1px solid #ddd; border-radius: 8px; padding: 6px 10px; background: #fafaf8; color: #1a1a1a; outline: none; }
+.filters input:focus, .filters select:focus { border-color: #888; }
+.btn { font-size: 13px; border: 1px solid #ddd; border-radius: 8px; padding: 6px 14px; background: #fafaf8; color: #1a1a1a; cursor: pointer; transition: background 0.15s; }
+.btn:hover { background: #f0f0ee; }
+.btn-refresh { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+.btn-refresh:hover { background: #0F6E56; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.metric { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 14px 16px; }
+.metric-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+.metric-val { font-size: 22px; font-weight: 500; }
+.charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.chart-card { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 16px; }
+.chart-title { font-size: 13px; font-weight: 500; color: #666; margin-bottom: 10px; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; font-size: 11px; color: #666; }
+.legend span { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.table-card { background: #fff; border: 1px solid #e5e5e3; border-radius: 12px; padding: 16px; }
+.table-title { font-size: 13px; font-weight: 500; color: #666; margin-bottom: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; color: #888; font-size: 11px; padding: 5px 8px; border-bottom: 1px solid #eee; }
+td { padding: 7px 8px; border-bottom: 1px solid #f0f0ee; color: #1a1a1a; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #fafaf8; }
+.pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+.pill-vnd { background: #E1F5EE; color: #0F6E56; }
+.pill-rub { background: #E6F1FB; color: #185FA5; }
+.pill-usd { background: #FAEEDA; color: #854F0B; }
+.pill-type { background: #f0f0ee; color: #555; }
+.status { text-align: center; padding: 3rem; color: #888; font-size: 14px; }
+.err { color: #E24B4A; }
+.updated { font-size: 12px; color: #aaa; }
+@media (max-width: 640px) {
+  .charts-row { grid-template-columns: 1fr; }
+  .header h1 { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Личные финансы</h1>
+    <div class="header-sub updated" id="lastUpdated">Загрузка...</div>
+  </div>
+  <button class="btn btn-refresh" onclick="loadData()">↻ Обновить</button>
+</div>
+
+<div class="container">
+
+  <div class="filters">
+    <label>С</label>
+    <input type="date" id="dateFrom">
+    <label>По</label>
+    <input type="date" id="dateTo">
+    <select id="catFilter"><option value="">Все категории</option></select>
+    <select id="whoFilter"><option value="">Все</option></select>
+    <select id="currFilter">
+      <option value="">Все валюты</option>
+      <option value="VND">VND ₫</option>
+      <option value="RUB">RUB ₽</option>
+      <option value="USDT">USDT $</option>
+    </select>
+    <select id="typeFilter">
+      <option value="">Все типы</option>
+      <option value="расход">Расход</option>
+      <option value="приход">Приход</option>
+      <option value="кэш">Кэш</option>
+    </select>
+    <button class="btn" onclick="applyFilters()">Применить</button>
+    <button class="btn" onclick="resetFilters()">Сброс</button>
+  </div>
+
+  <div class="metrics" id="metrics">
+    <div class="status">Загрузка данных...</div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Расходы по категориям ₫</div>
+      <div class="legend" id="leg-vnd"></div>
+      <div style="position:relative;height:220px"><canvas id="cCatVnd"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Расходы по категориям ₽</div>
+      <div class="legend" id="leg-rub"></div>
+      <div style="position:relative;height:220px"><canvas id="cCatRub"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Доход vs расход ₽</div>
+      <div style="position:relative;height:180px"><canvas id="cBalRub"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Доход vs расход ₫</div>
+      <div style="position:relative;height:180px"><canvas id="cBalVnd"></canvas></div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Расходы по категориям $ (USDT)</div>
+      <div class="legend" id="leg-usd"></div>
+      <div style="position:relative;height:180px"><canvas id="cCatUsd"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Доход vs расход $ (USDT)</div>
+      <div style="position:relative;height:180px"><canvas id="cBalUsd"></canvas></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-title">
+      Все транзакции <span id="txCount" style="font-weight:400;color:#aaa"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Кто</th>
+            <th>Тип</th>
+            <th style="text-align:right">Сумма</th>
+            <th>Валюта</th>
+            <th>Категория</th>
+            <th>Комментарий</th>
+          </tr>
+        </thead>
+        <tbody id="txBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SHEET_ID = '1fyExlrroNUS6idq5VyWyl7_CHAaYyGBGVJAiTUzQVSk';
+const SHEET_NAME = 'Транзакции';
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+const COLORS = ['#1D9E75','#378ADD','#D85A30','#D4537E','#BA7517','#534AB7','#639922','#E24B4A','#5DCAA5','#7F77DD','#EF9F27','#F09595'];
+
+let allData = [], filtered = [], charts = {};
+
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.trim().split('\n').slice(1);
+  for (const line of lines) {
+    const cols = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { inQ = !inQ; continue; }
+      if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; continue; }
+      cur += c;
+    }
+    cols.push(cur.trim());
+    if (cols[0]) rows.push(cols);
+  }
+  return rows;
+}
+
+async function loadData() {
+  document.getElementById('lastUpdated').textContent = 'Загрузка...';
+  document.getElementById('metrics').innerHTML = '<div class="status">Загрузка данных...</div>';
+  try {
+    const res = await fetch(CSV_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const rows = parseCSV(text);
+    allData = rows.map(r => ({
+      date: (r[0]||'').slice(0,10),
+      datetime: r[0]||'',
+      who: r[1]||'',
+      type: r[2]||'',
+      amount: parseFloat((r[3]||'0').replace(/[\s\u00a0]/g,'').replace(',','.')) || 0,
+      currency: r[4]||'',
+      category: r[5]||'',
+      comment: r[6]||''
+    })).filter(r => r.date && r.amount > 0);
+
+    populateFilters();
+    filtered = [...allData];
+    render();
+    document.getElementById('lastUpdated').textContent = 'Обновлено: ' + new Date().toLocaleString('ru');
+  } catch(e) {
+    document.getElementById('metrics').innerHTML = `<div class="status err">Ошибка загрузки: ${e.message}<br><br>Убедись что таблица открыта для всех по ссылке:<br>Файл → Поделиться → Все у кого есть ссылка → Читатель</div>`;
+    document.getElementById('lastUpdated').textContent = 'Ошибка загрузки';
+  }
+}
+
+function populateFilters() {
+  const cats = [...new Set(allData.map(r => r.category))].filter(Boolean).sort();
+  const whos = [...new Set(allData.map(r => r.who))].filter(Boolean).sort();
+  document.getElementById('catFilter').innerHTML = '<option value="">Все категории</option>' + cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  document.getElementById('whoFilter').innerHTML = '<option value="">Все</option>' + whos.map(w=>`<option value="${w}">${w}</option>`).join('');
+}
+
+function applyFilters() {
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  const cat = document.getElementById('catFilter').value;
+  const who = document.getElementById('whoFilter').value;
+  const curr = document.getElementById('currFilter').value;
+  const type = document.getElementById('typeFilter').value;
+  filtered = allData.filter(r => {
+    if (from && r.date < from) return false;
+    if (to && r.date > to) return false;
+    if (cat && r.category !== cat) return false;
+    if (who && r.who !== who) return false;
+    if (curr && r.currency !== curr) return false;
+    if (type && r.type !== type) return false;
+    return true;
+  });
+  render();
+}
+
+function resetFilters() {
+  ['dateFrom','dateTo','catFilter','whoFilter','currFilter','typeFilter'].forEach(id => document.getElementById(id).value = '');
+  filtered = [...allData];
+  render();
+}
+
+function sum(data, type, curr) {
+  return data.filter(r => r.type === type && r.currency === curr).reduce((a,r) => a+r.amount, 0);
+}
+
+function renderMetrics() {
+  const incRub = sum(filtered,'приход','RUB');
+  const incUsd = sum(filtered,'приход','USDT');
+  const cashVnd = sum(filtered,'кэш','VND');
+  const expRub = sum(filtered,'расход','RUB');
+  const expVnd = sum(filtered,'расход','VND');
+  const expUsd = sum(filtered,'расход','USDT');
+  const balRub = incRub - expRub;
+  const balVnd = cashVnd - expVnd;
+  const pos = '#1D9E75', neg = '#E24B4A';
+
+  const items = [
+    ['Доход ₽', Math.round(incRub).toLocaleString('ru') + ' ₽', ''],
+    ['Доход $', Math.round(incUsd).toLocaleString('ru') + ' $', ''],
+    ['Кэш получено ₫', Math.round(cashVnd/1000).toLocaleString('ru') + 'к ₫', ''],
+    ['Расход ₽', Math.round(expRub).toLocaleString('ru') + ' ₽', ''],
+    ['Расход ₫', Math.round(expVnd/1000).toLocaleString('ru') + 'к ₫', ''],
+    ['Расход $', Math.round(expUsd).toLocaleString('ru') + ' $', ''],
+    ['Баланс ₽', Math.round(balRub).toLocaleString('ru') + ' ₽', balRub>=0?pos:neg],
+    ['Баланс ₫', Math.round(balVnd/1000).toLocaleString('ru') + 'к ₫', balVnd>=0?pos:neg],
+  ];
+  document.getElementById('metrics').innerHTML = items.map(([l,v,c]) =>
+    `<div class="metric"><div class="metric-label">${l}</div><div class="metric-val"${c?` style="color:${c}"`:''}>${v}</div></div>`
+  ).join('');
+}
+
+function groupByCat(curr) {
+  const map = {};
+  filtered.filter(r => r.type==='расход' && r.currency===curr).forEach(r => {
+    map[r.category] = (map[r.category]||0) + r.amount;
+  });
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
+}
+
+function makeLegend(id, entries) {
+  document.getElementById(id).innerHTML = entries.map((e,i)=>
+    `<span><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${e[0]}</span>`
+  ).join('');
+}
+
+function mkChart(id, type, labels, datasets, opts={}) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type, data:{labels,datasets},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, ...opts}
+  });
+}
+
+function renderCatChart(canvasId, legId, curr) {
+  const entries = groupByCat(curr);
+  makeLegend(legId, entries);
+  const div = curr==='VND'?1000:1;
+  const suf = curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
+  mkChart(canvasId,'doughnut',entries.map(e=>e[0]),[{
+    data: entries.map(e=>Math.round(e[1]/div)),
+    backgroundColor: COLORS.slice(0,entries.length),
+    borderWidth:2, borderColor:'#fff'
+  }],{
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString('ru')}${suf}`}}}
+  });
+}
+
+function renderBalChart(canvasId, curr) {
+  const inc = sum(filtered,'приход',curr) + (curr==='VND'?sum(filtered,'кэш',curr):0);
+  const exp = sum(filtered,'расход',curr);
+  const div = curr==='VND'?1000:1;
+  const suf = curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
+  mkChart(canvasId,'bar',['Доход','Расход'],[{
+    data:[Math.round(inc/div),Math.round(exp/div)],
+    backgroundColor:['#1D9E75','#E24B4A'],
+    borderRadius:6, borderWidth:0
+  }],{
+    scales:{
+      y:{ticks:{font:{size:11}, callback:v=>v.toLocaleString('ru')+suf}},
+      x:{ticks:{font:{size:12}}}
+    },
+    plugins:{legend:{display:false}, tooltip:{callbacks:{label:ctx=>`${ctx.raw.toLocaleString('ru')}${suf}`}}}
+  });
+}
+
+function renderTable() {
+  const rows = [...filtered].reverse().slice(0,300);
+  document.getElementById('txCount').textContent = `(${filtered.length})`;
+  const pill = {VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd'};
+  document.getElementById('txBody').innerHTML = rows.map(r=>`
+    <tr>
+      <td>${r.datetime.slice(0,16)}</td>
+      <td>${r.who}</td>
+      <td><span class="pill pill-type">${r.type}</span></td>
+      <td style="text-align:right;font-weight:500">${Math.round(r.amount).toLocaleString('ru')}</td>
+      <td><span class="pill ${pill[r.currency]||''}">${r.currency}</span></td>
+      <td>${r.category}</td>
+      <td style="color:#888">${r.comment}</td>
+    </tr>`).join('');
+}
+
+function render() {
+  renderMetrics();
+  renderCatChart('cCatVnd','leg-vnd','VND');
+  renderCatChart('cCatRub','leg-rub','RUB');
+  renderCatChart('cCatUsd','leg-usd','USDT');
+  renderBalChart('cBalRub','RUB');
+  renderBalChart('cBalVnd','VND');
+  renderBalChart('cBalUsd','USDT');
+  renderTable();
+}
+
+loadData();
+</script>
+</body>
+</html>
