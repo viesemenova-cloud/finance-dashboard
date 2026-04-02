@@ -306,8 +306,11 @@ function renderMetrics() {
   const expRub = sum(filtered,'расход','RUB');
   const expVnd = sum(filtered,'расход','VND');
   const expUsd = sum(filtered,'расход','USDT');
-  const balRub = incRub - expRub;
-  const balVnd = cashVnd - expVnd;
+  // Остаток считаем по ВСЕМ данным до даты По (игнорируем фильтры категории/кто)
+  const dateTo = document.getElementById('dateTo').value;
+  const baseData = dateTo ? allData.filter(r => r.date <= dateTo) : allData;
+  const balRub = sum(baseData,'приход','RUB') - sum(baseData,'расход','RUB');
+  const balVnd = sum(baseData,'кэш','VND') - sum(baseData,'расход','VND');
 
   document.getElementById('metrics').innerHTML = [
     ['Вывели ₽',       Math.round(incRub).toLocaleString('ru')+' ₽',        'accent-cherry', ''],
