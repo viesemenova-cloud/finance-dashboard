@@ -23,6 +23,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .header h1 { font-size: 17px; font-weight: 500; color: #fff; }
 .header p { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
 .header-travel { background: var(--travel); }
+.header-history { background: #2A4A6A; }
 .btn { font-size: 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 7px 14px; background: rgba(255,255,255,0.12); color: #fff; cursor: pointer; }
 .btn:hover { background: rgba(255,255,255,0.22); }
 
@@ -131,7 +132,36 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .modal-tx-table tr:last-child td { border-bottom:none; }
 .modal-tx-table td:last-child { text-align:right; font-weight:500; }
 
-/* COMPARISON TABLE */
+/* HISTORY PAGE */
+.hist-section { margin-bottom: 28px; }
+.hist-scroll { overflow-x: auto; }
+.hist-table { border-collapse: collapse; font-size: 12px; min-width: 100%; }
+.hist-table th { font-size: 10px; font-weight: 600; color: var(--stone-text); padding: 5px 10px; border-bottom: 2px solid var(--stone-dark); white-space: nowrap; text-align: right; background: #fff; position: sticky; top: 0; }
+.hist-table th:first-child { text-align: left; position: sticky; left: 0; background: #fff; z-index: 2; min-width: 140px; }
+.hist-table td { padding: 6px 10px; border-bottom: 1px solid var(--stone); text-align: right; white-space: nowrap; }
+.hist-table td:first-child { text-align: left; font-weight: 500; position: sticky; left: 0; background: #fff; z-index: 1; }
+.hist-table tr:hover td { background: var(--stone); }
+.hist-table tr:hover td:first-child { background: var(--stone); }
+.hist-table tfoot td { font-weight: 700; border-top: 2px solid var(--stone-dark); border-bottom: none; background: #fff; }
+.hist-table tfoot td:first-child { position: sticky; left: 0; background: #fff; }
+.hist-zero { color: var(--stone-dark); }
+.hist-val-vnd { color: var(--cherry); }
+.hist-val-rub { color: var(--blue); }
+.hist-val-usd { color: var(--green); }
+.hist-income-val { color: var(--green); font-weight: 600; }
+.hist-month-label { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; }
+.hist-subtabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.hist-subtab { font-size: 12px; padding: 5px 14px; border-radius: 8px; border: 1px solid var(--stone-dark); background: var(--stone); cursor: pointer; color: var(--black); transition: all 0.15s; }
+.hist-subtab.active { background: var(--cherry); color: #fff; border-color: var(--cherry); }
+.hist-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 10px; margin-bottom: 20px; }
+.hist-summary-card { background: var(--stone); border-radius: 10px; padding: 12px 14px; }
+.hist-summary-label { font-size: 10px; color: var(--stone-text); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.hist-summary-val { font-size: 18px; font-weight: 600; }
+.heatmap-low { background: #FFF5F5; }
+.heatmap-mid { background: #FCD4D4; }
+.heatmap-high { background: #F5A0A0; }
+.heatmap-top { background: #E06060; color: #fff; }
+.tab-history.active { border-bottom-color: #A0C4FF; color: #A0C4FF; }
 .cmp-table { width:100%; border-collapse:collapse; font-size:12px; }
 .cmp-table th { text-align:left; font-weight:500; color:var(--stone-text); font-size:10px; padding:5px 8px; border-bottom:1px solid var(--stone-dark); }
 .cmp-table th:not(:first-child) { text-align:right; }
@@ -193,6 +223,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="tabs">
     <div class="tab active" onclick="switchTab('main')">📊 Основной</div>
     <div class="tab tab-travel" onclick="switchTab('travel')">✈️ Путешествие</div>
+    <div class="tab tab-history" onclick="switchTab('history')">📅 История</div>
   </div>
 </div>
 
@@ -267,7 +298,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="card">
       <div class="cmp-period-toggle">
         <button class="cmp-period-btn active" id="cmpBtnCurrent" onclick="setCmpMode('current')">Текущий месяц</button>
-        <button class="cmp-period-btn" id="cmpBtnFiltered" onclick="setCmpMode('filtered')">Выбранный период</button>
+        <button class="cmp-period-btn" id="cmpBtnFiltered" onclick="setCmpMode('filtered')">Свой период из фильтров</button>
       </div>
       <div id="cmpContent"><div class="status">Загрузка...</div></div>
     </div>
@@ -291,6 +322,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <!-- ======== TRAVEL PAGE ======== -->
 <div class="page" id="page-travel">
   <div id="travelContent"><div class="status">Загрузка...</div></div>
+</div>
+
+<!-- ======== HISTORY PAGE ======== -->
+<div class="page" id="page-history">
+  <div id="historyContent"><div class="status">Загрузка...</div></div>
 </div>
 
 </div><!-- /container -->
@@ -373,17 +409,23 @@ function resetFilters() {
 function switchTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach((t,i)=>{
-    t.classList.toggle('active', (i===0&&tab==='main')||(i===1&&tab==='travel'));
+    t.classList.toggle('active', (i===0&&tab==='main')||(i===1&&tab==='travel')||(i===2&&tab==='history'));
   });
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+tab).classList.add('active');
   const header = document.getElementById('mainHeader');
   if(tab==='travel') {
     header.classList.add('header-travel');
+    header.classList.remove('header-history');
     document.getElementById('headerTitle').textContent = '✈️ Режим путешествия';
     renderTravel();
-  } else {
+  } else if(tab==='history') {
     header.classList.remove('header-travel');
+    header.classList.add('header-history');
+    document.getElementById('headerTitle').textContent = '📅 История по месяцам';
+    renderHistory();
+  } else {
+    header.classList.remove('header-travel','header-history');
     document.getElementById('headerTitle').textContent = 'Личные финансы';
   }
 }
@@ -524,81 +566,88 @@ function setCmpMode(mode) {
 
 function getMonthRange(offset) {
   const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth()+offset;
-  const start = new Date(y, m, 1);
-  const end = new Date(y, m+1, 0);
-  return {
-    from: start.toISOString().slice(0,10),
-    to: end.toISOString().slice(0,10)
-  };
+  const y = now.getFullYear();
+  const m = now.getMonth() + offset; // 0-based
+  // Use explicit year/month to avoid timezone issues
+  const startY = m < 0 ? y - 1 : (m > 11 ? y + 1 : y);
+  const startM = ((m % 12) + 12) % 12;
+  const pad = n => String(n).padStart(2,'0');
+  const from = `${startY}-${pad(startM+1)}-01`;
+  // Last day of month
+  const lastDay = new Date(startY, startM+1, 0).getDate();
+  const to = `${startY}-${pad(startM+1)}-${pad(lastDay)}`;
+  return { from, to, year: startY, month: startM };
 }
 
+const MONTH_NAMES_RU = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
 function renderComparison() {
-  let curFrom, curTo, prevFrom, prevTo;
+  let curFrom, curTo, prevFrom, prevTo, curLabel, prevLabel;
 
   if(cmpMode==='current') {
-    const cur = getMonthRange(0);
-    const prev = getMonthRange(-1);
-    curFrom=cur.from; curTo=cur.to;
+    const cur  = getMonthRange(0);   // текущий месяц (май)
+    const prev = getMonthRange(-1);  // прошлый месяц (апрель)
+    curFrom=cur.from;   curTo=cur.to;
     prevFrom=prev.from; prevTo=prev.to;
+    curLabel  = MONTH_NAMES_RU[cur.month]  + ' ' + cur.year;
+    prevLabel = MONTH_NAMES_RU[prev.month] + ' ' + prev.year;
   } else {
-    // Use filtered period, prev = same duration shifted back
+    // Filtered mode — требует заданного периода в фильтрах
     const from = document.getElementById('dateFrom').value;
-    const to = document.getElementById('dateTo').value;
-    if(!from||!to) {
-      document.getElementById('cmpContent').innerHTML='<div class="status" style="padding:1rem">Задай период в фильтрах</div>';
+    const to   = document.getElementById('dateTo').value;
+    if(!from || !to) {
+      document.getElementById('cmpContent').innerHTML = `
+        <div style="padding:16px;color:var(--stone-text);font-size:13px;text-align:center">
+          Задай период в фильтрах выше (поля «С» и «По»),<br>тогда здесь покажется сравнение с таким же по длине периодом до него.
+        </div>`;
       return;
     }
     curFrom=from; curTo=to;
-    const dur = (new Date(to)-new Date(from)); // ms
-    const prevToDate = new Date(new Date(from).getTime()-1);
-    const prevFromDate = new Date(prevToDate.getTime()-dur);
-    prevFrom=prevFromDate.toISOString().slice(0,10);
-    prevTo=prevToDate.toISOString().slice(0,10);
+    // Предыдущий период — такая же длина, непосредственно перед curFrom
+    const durMs = new Date(to) - new Date(from);
+    const prevToDate   = new Date(new Date(from) - 24*60*60*1000); // день до from
+    const prevFromDate = new Date(prevToDate - durMs);
+    prevFrom = prevFromDate.toISOString().slice(0,10);
+    prevTo   = prevToDate.toISOString().slice(0,10);
+    curLabel  = `${curFrom} — ${curTo}`;
+    prevLabel = `${prevFrom} — ${prevTo}`;
   }
 
-  const curData = allData.filter(r=>r.date>=curFrom&&r.date<=curTo);
-  const prevData = allData.filter(r=>r.date>=prevFrom&&r.date<=prevTo);
-
-  const allCats = [...new Set([
-    ...groupByCat(curData,'VND').map(e=>e[0]),
-    ...groupByCat(prevData,'VND').map(e=>e[0])
-  ])];
+  // Только строгие расходы (тип = 'расход'), исключаем кэш/путешествие
+  const onlyExp = r => r.type === 'расход';
+  const curData  = allData.filter(r => r.date >= curFrom  && r.date <= curTo  && onlyExp(r));
+  const prevData = allData.filter(r => r.date >= prevFrom && r.date <= prevTo && onlyExp(r));
 
   const curMap={}, prevMap={};
   groupByCat(curData,'VND').forEach(([c,v])=>curMap[c]=v);
   groupByCat(prevData,'VND').forEach(([c,v])=>prevMap[c]=v);
 
+  const allCats = [...new Set([...Object.keys(curMap), ...Object.keys(prevMap)])];
+
   const rows = allCats.map(cat=>{
     const cur=curMap[cat]||0, prev=prevMap[cat]||0;
     let delta='', cls='delta-same';
-    if(prev>0) {
+    if(prev>0 && cur>0) {
       const pct=Math.round((cur-prev)/prev*100);
       if(pct>0){ delta=`+${pct}%`; cls='delta-up'; }
       else if(pct<0){ delta=`${pct}%`; cls='delta-down'; }
       else delta='0%';
-    } else if(cur>0) { delta='новое'; cls='delta-up'; }
-    return {cat,cur,prev,delta,cls};
+    } else if(!prev && cur>0) { delta='новое'; cls='delta-up'; }
+    else if(prev>0 && !cur)   { delta='нет трат'; cls='delta-down'; }
+    return {cat, cur, prev, delta, cls};
   }).sort((a,b)=>b.cur-a.cur);
 
-  const curTotal=rows.reduce((a,r)=>a+r.cur,0);
-  const prevTotal=rows.reduce((a,r)=>a+r.prev,0);
-  const totalDelta=prevTotal>0?Math.round((curTotal-prevTotal)/prevTotal*100):0;
-  const totalCls=totalDelta>0?'delta-up':totalDelta<0?'delta-down':'delta-same';
-  const totalSign=totalDelta>0?'+':'';
-
-  const prevLabel = cmpMode==='current'
-    ? new Date(prevFrom).toLocaleString('ru',{month:'long'})
-    : `${prevFrom} — ${prevTo}`;
-  const curLabel = cmpMode==='current'
-    ? new Date(curFrom).toLocaleString('ru',{month:'long'})
-    : `${curFrom} — ${curTo}`;
+  const curTotal  = rows.reduce((a,r)=>a+r.cur,0);
+  const prevTotal = rows.reduce((a,r)=>a+r.prev,0);
+  const totalDelta = prevTotal>0 ? Math.round((curTotal-prevTotal)/prevTotal*100) : 0;
+  const totalCls   = totalDelta>0?'delta-up':totalDelta<0?'delta-down':'delta-same';
+  const totalSign  = totalDelta>0?'+':'';
 
   document.getElementById('cmpContent').innerHTML = `
     <table class="cmp-table">
       <thead>
         <tr>
-          <th>Категория</th>
+          <th>Категория ₫</th>
           <th>${prevLabel}</th>
           <th>${curLabel}</th>
           <th>Изменение</th>
@@ -613,7 +662,7 @@ function renderComparison() {
         </tr>`).join('')}
       </tbody>
       <tfoot>
-        <tr style="font-weight:600;border-top:1px solid var(--stone-dark)">
+        <tr style="font-weight:600">
           <td>Итого ₫</td>
           <td style="color:var(--stone-text)">${Math.round(prevTotal/1000).toLocaleString('ru')}к</td>
           <td>${Math.round(curTotal/1000).toLocaleString('ru')}к</td>
@@ -621,6 +670,7 @@ function renderComparison() {
         </tr>
       </tfoot>
     </table>`;
+}
 }
 
 // ===== TX TABLE =====
@@ -769,6 +819,250 @@ function openTravelCatModal(cat) {
       <td><span class="pill ${currPill[r.currency]||'pill-type'}">${Math.round(r.amount).toLocaleString('ru')} ${r.currency==='VND'?'₫':r.currency==='Воны'?'₩':r.currency==='RUB'?'₽':'$'}</span></td>
     </tr>`).join('') || '<tr><td colspan="4" class="status">нет транзакций</td></tr>';
   document.getElementById('catModal').classList.add('open');
+}
+
+// ===== HISTORY PAGE =====
+let histSubtab = 'income';
+
+function setHistSubtab(t) {
+  histSubtab = t;
+  document.querySelectorAll('.hist-subtab').forEach(el => {
+    el.classList.toggle('active', el.dataset.tab === t);
+  });
+  renderHistContent();
+}
+
+function getMonths() {
+  const monthSet = new Set(allData.map(r => r.date.slice(0,7)));
+  return [...monthSet].sort();
+}
+
+function monthLabel(ym) {
+  const [y, m] = ym.split('-');
+  const names = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  return names[parseInt(m)-1] + ' ' + y.slice(2);
+}
+
+function renderHistory() {
+  document.getElementById('historyContent').innerHTML = `
+    <div class="hist-subtabs">
+      <button class="hist-subtab active" data-tab="income" onclick="setHistSubtab('income')">💚 Приходы</button>
+      <button class="hist-subtab" data-tab="exp-vnd" onclick="setHistSubtab('exp-vnd')">🇻🇳 Расходы ₫</button>
+      <button class="hist-subtab" data-tab="exp-rub" onclick="setHistSubtab('exp-rub')">🇷🇺 Расходы ₽</button>
+      <button class="hist-subtab" data-tab="exp-usd" onclick="setHistSubtab('exp-usd')">🇺🇸 Расходы $</button>
+      <button class="hist-subtab" data-tab="cats-vnd" onclick="setHistSubtab('cats-vnd')">📊 Категории ₫</button>
+      <button class="hist-subtab" data-tab="cats-rub" onclick="setHistSubtab('cats-rub')">📊 Категории ₽</button>
+    </div>
+    <div id="histSubContent"></div>`;
+  histSubtab = 'income';
+  renderHistContent();
+}
+
+function renderHistContent() {
+  const months = getMonths();
+  const el = document.getElementById('histSubContent');
+  if(!el) return;
+
+  if(histSubtab === 'income') {
+    el.innerHTML = renderHistIncome(months);
+  } else if(histSubtab === 'exp-vnd') {
+    el.innerHTML = renderHistExpTotal(months, 'VND', '₫', 1000, 'к');
+  } else if(histSubtab === 'exp-rub') {
+    el.innerHTML = renderHistExpTotal(months, 'RUB', '₽', 1, '');
+  } else if(histSubtab === 'exp-usd') {
+    el.innerHTML = renderHistExpTotal(months, 'USDT', '$', 1, '');
+  } else if(histSubtab === 'cats-vnd') {
+    el.innerHTML = renderHistCatMatrix(months, 'VND', '₫', 1000, 'к');
+  } else if(histSubtab === 'cats-rub') {
+    el.innerHTML = renderHistCatMatrix(months, 'RUB', '₽', 1, '');
+  }
+}
+
+function renderHistIncome(months) {
+  // Sources: Синтекс, Бизнес, Другое, Кэш ₫
+  const sources = [
+    { key:'Синтекс', label:'Синтекс', curr:['RUB','USDT'], filter: r=>r.type==='приход'&&r.category.toLowerCase().includes('синтекс') },
+    { key:'Бизнес',  label:'Бизнес',  curr:['RUB','USDT'], filter: r=>r.type==='приход'&&r.category.toLowerCase().includes('бизнес') },
+    { key:'Другое',  label:'Другое',  curr:['RUB','USDT','VND'], filter: r=>r.type==='приход'&&!r.category.toLowerCase().includes('синтекс')&&!r.category.toLowerCase().includes('бизнес') },
+    { key:'Кэш ₫',  label:'Кэш получено ₫', curr:['VND'], filter: r=>r.type==='кэш'&&r.currency==='VND' },
+  ];
+
+  // Build per-source per-month totals split by currency
+  const data = {}; // source -> month -> {RUB,USDT,VND}
+  sources.forEach(s => {
+    data[s.key] = {};
+    months.forEach(m => {
+      data[s.key][m] = {RUB:0, USDT:0, VND:0};
+    });
+    allData.filter(s.filter).forEach(r => {
+      const m = r.date.slice(0,7);
+      if(data[s.key][m]) data[s.key][m][r.currency] = (data[s.key][m][r.currency]||0) + r.amount;
+    });
+  });
+
+  // Summary cards
+  const totRub = allData.filter(r=>r.type==='приход'&&r.currency==='RUB').reduce((a,r)=>a+r.amount,0);
+  const totUsd = allData.filter(r=>r.type==='приход'&&r.currency==='USDT').reduce((a,r)=>a+r.amount,0);
+  const totVnd = allData.filter(r=>r.type==='кэш'&&r.currency==='VND').reduce((a,r)=>a+r.amount,0);
+
+  const summaryHtml = `<div class="hist-summary-grid">
+    <div class="hist-summary-card"><div class="hist-summary-label">Всего получено ₽</div><div class="hist-summary-val hist-val-rub">${Math.round(totRub).toLocaleString('ru')} ₽</div></div>
+    <div class="hist-summary-card"><div class="hist-summary-label">Всего получено $</div><div class="hist-summary-val hist-val-usd">${Math.round(totUsd).toLocaleString('ru')} $</div></div>
+    <div class="hist-summary-card"><div class="hist-summary-label">Кэш ₫ за всё время</div><div class="hist-summary-val hist-val-vnd">${Math.round(totVnd/1000).toLocaleString('ru')}к ₫</div></div>
+    <div class="hist-summary-card"><div class="hist-summary-label">Месяцев</div><div class="hist-summary-val">${months.length}</div></div>
+  </div>`;
+
+  const colsHtml = months.map(m=>`<th class="hist-month-label">${monthLabel(m)}</th>`).join('');
+
+  const rowsHtml = sources.map(s => {
+    const cells = months.map(m => {
+      const v = data[s.key][m];
+      const parts = [];
+      if(v.RUB) parts.push(`<span class="hist-val-rub">${Math.round(v.RUB).toLocaleString('ru')}₽</span>`);
+      if(v.USDT) parts.push(`<span class="hist-val-usd">${Math.round(v.USDT).toLocaleString('ru')}$</span>`);
+      if(v.VND) parts.push(`<span class="hist-val-vnd">${Math.round(v.VND/1000).toLocaleString('ru')}к₫</span>`);
+      return `<td>${parts.join('<br>') || '<span class="hist-zero">—</span>'}</td>`;
+    }).join('');
+    return `<tr><td>${s.label}</td>${cells}</tr>`;
+  }).join('');
+
+  // Totals row per month (RUB)
+  const totRowHtml = months.map(m => {
+    const rub = sources.slice(0,3).reduce((a,s)=>a+(data[s.key][m].RUB||0),0);
+    const usd = sources.slice(0,3).reduce((a,s)=>a+(data[s.key][m].USDT||0),0);
+    const parts=[];
+    if(rub) parts.push(`<span class="hist-val-rub">${Math.round(rub).toLocaleString('ru')}₽</span>`);
+    if(usd) parts.push(`<span class="hist-val-usd">${Math.round(usd).toLocaleString('ru')}$</span>`);
+    return `<td>${parts.join('<br>')||'—'}</td>`;
+  }).join('');
+
+  return summaryHtml + `<div class="card" style="padding:0"><div class="hist-scroll"><table class="hist-table">
+    <thead><tr><th>Источник</th>${colsHtml}</tr></thead>
+    <tbody>${rowsHtml}</tbody>
+    <tfoot><tr><td>Итого</td>${totRowHtml}</tr></tfoot>
+  </table></div></div>`;
+}
+
+function renderHistExpTotal(months, curr, sym, div, suf) {
+  // Types to count: расход + путешествие
+  const byMonth = {};
+  months.forEach(m => byMonth[m] = 0);
+  allData.filter(r=>(r.type==='расход'||r.type==='путешествие')&&r.currency===curr).forEach(r=>{
+    const m=r.date.slice(0,7);
+    if(byMonth[m]!==undefined) byMonth[m]+=r.amount;
+  });
+
+  const vals = months.map(m=>byMonth[m]);
+  const maxVal = Math.max(...vals, 1);
+  const total = vals.reduce((a,v)=>a+v,0);
+  const avg = total / (months.filter(m=>byMonth[m]>0).length || 1);
+
+  const summaryHtml = `<div class="hist-summary-grid">
+    <div class="hist-summary-card"><div class="hist-summary-label">Всего потрачено</div><div class="hist-summary-val">${Math.round(total/div).toLocaleString('ru')}${suf} ${sym}</div></div>
+    <div class="hist-summary-card"><div class="hist-summary-label">Среднее в месяц</div><div class="hist-summary-val">${Math.round(avg/div).toLocaleString('ru')}${suf} ${sym}</div></div>
+    <div class="hist-summary-card"><div class="hist-summary-label">Макс месяц</div><div class="hist-summary-val">${Math.round(maxVal/div).toLocaleString('ru')}${suf} ${sym}</div></div>
+  </div>`;
+
+  // Bar chart as table
+  const rowsHtml = `<tr>
+    ${months.map(m=>{
+      const v=byMonth[m];
+      const pct=v>0?Math.round(v/maxVal*100):0;
+      return `<td style="vertical-align:bottom;padding:0 4px 6px">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
+          <div style="font-size:10px;color:var(--stone-text)">${v?Math.round(v/div).toLocaleString('ru')+suf:''}</div>
+          <div style="width:28px;height:${Math.max(pct*1.2,2)}px;background:var(--cherry);border-radius:3px 3px 0 0;min-height:2px"></div>
+        </div>
+      </td>`;
+    }).join('')}
+  </tr>`;
+
+  const colsHtml = months.map(m=>`<th class="hist-month-label">${monthLabel(m)}</th>`).join('');
+  const dataRowHtml = months.map(m=>{
+    const v=byMonth[m];
+    return `<td style="font-weight:${v>avg*1.2?'700':'400'};color:${v>avg*1.5?'var(--cherry)':v>0?'var(--black)':'var(--stone-dark)'}">${v?Math.round(v/div).toLocaleString('ru')+suf+' '+sym:'—'}</td>`;
+  }).join('');
+
+  return summaryHtml + `<div class="card" style="padding:0 0 0 0; overflow:hidden">
+    <div class="hist-scroll">
+      <table class="hist-table" style="min-width:${months.length*70}px">
+        <thead><tr><th>Месяц</th>${colsHtml}</tr></thead>
+        <tbody>
+          <tr style="height:120px"><td style="color:var(--stone-text);font-size:11px;vertical-align:middle">График</td>${rowsHtml.replace('<tr>','').replace('</tr>','')}</tr>
+          <tr><td style="font-weight:600">Сумма</td>${dataRowHtml}</tr>
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderHistCatMatrix(months, curr, sym, div, suf) {
+  // Gather all categories
+  const catSet = new Set();
+  allData.filter(r=>(r.type==='расход'||r.type==='путешествие')&&r.currency===curr).forEach(r=>catSet.add(r.category));
+  const cats = [...catSet];
+
+  // Build matrix: cat -> month -> amount
+  const matrix = {};
+  cats.forEach(cat => {
+    matrix[cat] = {};
+    months.forEach(m => matrix[cat][m] = 0);
+  });
+  allData.filter(r=>(r.type==='расход'||r.type==='путешествие')&&r.currency===curr).forEach(r=>{
+    const m=r.date.slice(0,7);
+    if(matrix[r.category] && matrix[r.category][m]!==undefined)
+      matrix[r.category][m]+=r.amount;
+  });
+
+  // Sort cats by total desc
+  const catTotals = cats.map(cat=>({cat, total:months.reduce((a,m)=>a+matrix[cat][m],0)})).sort((a,b)=>b.total-a.total);
+
+  // Month totals
+  const monthTotals = {};
+  months.forEach(m => monthTotals[m] = catTotals.reduce((a,{cat})=>a+matrix[cat][m],0));
+  const maxMonthTotal = Math.max(...Object.values(monthTotals),1);
+
+  // Heatmap cell class
+  function heatClass(val, catMax) {
+    if(!val) return '';
+    const pct = val/catMax;
+    if(pct>0.75) return 'heatmap-top';
+    if(pct>0.5) return 'heatmap-high';
+    if(pct>0.25) return 'heatmap-mid';
+    return 'heatmap-low';
+  }
+
+  const colsHtml = months.map(m=>`<th class="hist-month-label">${monthLabel(m)}</th>`).join('');
+
+  const rowsHtml = catTotals.map(({cat,total})=>{
+    const catMax = Math.max(...months.map(m=>matrix[cat][m]),1);
+    const cells = months.map(m=>{
+      const v=matrix[cat][m];
+      const cls=heatClass(v,catMax);
+      return `<td class="${cls}">${v?Math.round(v/div).toLocaleString('ru')+suf:'<span class="hist-zero">—</span>'}</td>`;
+    }).join('');
+    return `<tr><td>${cat} <span style="color:var(--stone-text);font-size:10px">${Math.round(total/div).toLocaleString('ru')}${suf}</span></td>${cells}</tr>`;
+  }).join('');
+
+  const totRowHtml = months.map(m=>{
+    const v=monthTotals[m];
+    const intensity=Math.round(v/maxMonthTotal*100);
+    return `<td style="font-weight:700;background:rgba(139,26,26,${intensity/200})">${v?Math.round(v/div).toLocaleString('ru')+suf+' '+sym:'—'}</td>`;
+  }).join('');
+
+  const grandTotal = catTotals.reduce((a,{total})=>a+total,0);
+  const summaryHtml = `<div class="hist-summary-grid" style="margin-bottom:12px">
+    <div class="hist-summary-card"><div class="hist-summary-label">Всего потрачено</div><div class="hist-summary-val">${Math.round(grandTotal/div).toLocaleString('ru')}${suf} ${sym}</div></div>
+    <div class="hist-summary-card"><div class="hist-summary-label">Категорий</div><div class="hist-summary-val">${cats.length}</div></div>
+    <div class="hist-summary-card"><div class="hist-summary-label">Топ категория</div><div class="hist-summary-val" style="font-size:14px">${catTotals[0]?.cat||'—'}</div></div>
+  </div>
+  <div style="font-size:11px;color:var(--stone-text);margin-bottom:8px">🟥 тепловая карта — чем темнее, тем больше относительно максимума по строке</div>`;
+
+  return summaryHtml + `<div class="card" style="padding:0"><div class="hist-scroll"><table class="hist-table">
+    <thead><tr><th>Категория</th>${colsHtml}</tr></thead>
+    <tbody>${rowsHtml}</tbody>
+    <tfoot><tr><td>Итого ${sym}</td>${totRowHtml}</tr></tfoot>
+  </table></div></div>`;
 }
 
 // ===== MAIN RENDER =====
