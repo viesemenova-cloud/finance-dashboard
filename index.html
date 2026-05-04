@@ -691,74 +691,164 @@ function renderTable() {
 }
 
 // ===== TRAVEL PAGE =====
-function renderTravel() {
-  const travelData = allData.filter(r=>r.category==='Путешествия');
-  const expVnd = travelData.filter(r=>r.type==='расход'&&r.currency==='VND').reduce((a,r)=>a+r.amount,0);
-  const expRub = travelData.filter(r=>r.type==='расход'&&r.currency==='RUB').reduce((a,r)=>a+r.amount,0);
-  const expVony = travelData.filter(r=>r.type==='путешествие'&&r.currency==='Воны').reduce((a,r)=>a+r.amount,0);
-  const expUsd = travelData.filter(r=>r.type==='расход'&&r.currency==='USDT').reduce((a,r)=>a+r.amount,0);
-  const txCount = travelData.length;
-  const days = travelData.length ? (() => {
-    const dates = [...new Set(travelData.map(r=>r.date))].sort();
-    if(dates.length<2) return 1;
-    return Math.round((new Date(dates[dates.length-1])-new Date(dates[0]))/(1000*60*60*24))+1;
-  })() : 0;
+// Путешествие = тип 'путешествие' ИЛИ категория 'Путешествия'
+function isTravelRow(r) {
+  return r.type === 'путешествие' || r.category === 'Путешествия';
+}
 
-  // By subcategory (comment-based) — or by date grouping
-  const byComment = {};
-  travelData.filter(r=>r.currency==='VND'||r.currency==='Воны').forEach(r=>{
-    const key = r.comment||'Другое';
-    if(!byComment[key]) byComment[key]={vnd:0,vony:0,cnt:0};
-    if(r.currency==='VND') byComment[key].vnd+=r.amount;
-    if(r.currency==='Воны') byComment[key].vony+=r.amount;
-    byComment[key].cnt++;
+function currencyToCountry(curr) {
+  if(curr === 'Воны') return '🇰🇷 Корея';
+  if(curr === 'VND')  return '🇻🇳 Вьетнам';
+  if(curr === 'RUB')  return '🇷🇺 Россия';
+  if(curr === 'USDT') return '💵 USD';
+  return curr;
+}
+
+function fmtAmount(r) {
+  const amt = Math.round(r.amount).toLocaleString('ru');
+  if(r.currency==='VND')  return Math.round(r.amount/1000).toLocaleString('ru')+'к ₫';
+  if(r.currency==='Воны') return amt+' ₩';
+  if(r.currency==='RUB')  return amt+' ₽';
+  if(r.currency==='USDT') return amt+' $';
+  return amt+' '+r.currency;
+}
+
+function detectTravelCat(comment) {
+  const c = (comment||'').toLowerCase();
+  if(/такси|метро|транспорт|автобус|аэроэкспресс|трансфер/.test(c)) return '🚕 Транспорт';
+  if(/кофе/.test(c)) return '☕ Кофе';
+  if(/кафе|ресторан|еда|завтрак|обед|ужин|чай|вода|сок|булочка|твистер|мясо|круасан|сендвич/.test(c)) return '🍜 Еда и кафе';
+  if(/отель|хостел|жильё|квартира|апарт/.test(c)) return '🏨 Проживание';
+  if(/сувенир/.test(c)) return '🎁 Сувениры';
+  if(/очки|шопинг|магазин|одежда/.test(c)) return '🛍 Шопинг';
+  if(/симка/.test(c)) return '📱 Связь';
+  if(/продукт/.test(c)) return '🛒 Продукты';
+  return '📦 Другое';
+}
+
+// Текущий фильтр для вкладки путешествий
+let travelFilter = { from: '', to: '', country: '' };
+
+function applyTravelFilter() {
+  travelFilter.from    = document.getElementById('tvFrom').value;
+  travelFilter.to      = document.getElementById('tvTo').value;
+  travelFilter.country = document.getElementById('tvCountry').value;
+  renderTravelContent();
+}
+function resetTravelFilter() {
+  ['tvFrom','tvTo','tvCountry'].forEach(id=>document.getElementById(id).value='');
+  travelFilter = { from:'', to:'', country:'' };
+  renderTravelContent();
+}
+
+function renderTravel() {
+  // Сначала рендерим оболочку с фильтрами
+  const countries = [...new Set(allData.filter(isTravelRow).map(r=>currencyToCountry(r.currency)))].sort();
+  document.getElementById('travelContent').innerHTML = `
+    <div class="filters" style="margin-bottom:16px">
+      <label>С</label><input type="date" id="tvFrom">
+      <label>По</label><input type="date" id="tvTo">
+      <select id="tvCountry">
+        <option value="">Все страны</option>
+        ${countries.map(c=>`<option value="${c}">${c}</option>`).join('')}
+      </select>
+      <button class="filter-btn filter-btn-apply" style="background:var(--travel);border-color:var(--travel)" onclick="applyTravelFilter()">Применить</button>
+      <button class="filter-btn" onclick="resetTravelFilter()">Сброс</button>
+    </div>
+    <div id="travelInner"></div>`;
+  renderTravelContent();
+}
+
+function renderTravelContent() {
+  const { from, to, country } = travelFilter;
+  const travelData = allData.filter(r => {
+    if(!isTravelRow(r)) return false;
+    if(from && r.date < from) return false;
+    if(to   && r.date > to)   return false;
+    if(country && currencyToCountry(r.currency) !== country) return false;
+    return true;
   });
 
-  // Cat breakdown by what was bought
+  const expVnd  = travelData.filter(r=>r.currency==='VND').reduce((a,r)=>a+r.amount,0);
+  const expVony = travelData.filter(r=>r.currency==='Воны').reduce((a,r)=>a+r.amount,0);
+  const expRub  = travelData.filter(r=>r.currency==='RUB').reduce((a,r)=>a+r.amount,0);
+  const expUsd  = travelData.filter(r=>r.currency==='USDT').reduce((a,r)=>a+r.amount,0);
+
+  const txCount = travelData.length;
+  const uniqueDates = [...new Set(travelData.map(r=>r.date))].sort();
+  const days = uniqueDates.length;
+
+  // Группировка по стране
+  const byCountry = {};
+  travelData.forEach(r=>{
+    const c = currencyToCountry(r.currency);
+    if(!byCountry[c]) byCountry[c]={vnd:0,vony:0,rub:0,usd:0,cnt:0,dates:new Set()};
+    if(r.currency==='VND')  byCountry[c].vnd+=r.amount;
+    if(r.currency==='Воны') byCountry[c].vony+=r.amount;
+    if(r.currency==='RUB')  byCountry[c].rub+=r.amount;
+    if(r.currency==='USDT') byCountry[c].usd+=r.amount;
+    byCountry[c].cnt++;
+    byCountry[c].dates.add(r.date);
+  });
+
+  const countryCards = Object.entries(byCountry).map(([c,v])=>`
+    <div class="travel-stat">
+      <div class="travel-stat-label">${c}</div>
+      <div class="travel-stat-val" style="font-size:14px">
+        ${v.vnd?`<div>${Math.round(v.vnd/1000).toLocaleString('ru')}к ₫</div>`:''}
+        ${v.vony?`<div>${Math.round(v.vony).toLocaleString('ru')} ₩</div>`:''}
+        ${v.rub?`<div>${Math.round(v.rub).toLocaleString('ru')} ₽</div>`:''}
+        ${v.usd?`<div>${Math.round(v.usd).toLocaleString('ru')} $</div>`:''}
+      </div>
+      <div class="travel-stat-sub">${v.cnt} транз · ${v.dates.size} дн.</div>
+    </div>`).join('');
+
+  // Категории
   const catGroups = {};
   travelData.forEach(r=>{
     const cat = detectTravelCat(r.comment||r.category);
     if(!catGroups[cat]) catGroups[cat]={vnd:0,vony:0,rub:0,usd:0,cnt:0};
-    if(r.currency==='VND') catGroups[cat].vnd+=r.amount;
-    else if(r.currency==='Воны') catGroups[cat].vony+=r.amount;
-    else if(r.currency==='RUB') catGroups[cat].rub+=r.amount;
-    else if(r.currency==='USDT') catGroups[cat].usd+=r.amount;
+    if(r.currency==='VND')  catGroups[cat].vnd+=r.amount;
+    if(r.currency==='Воны') catGroups[cat].vony+=r.amount;
+    if(r.currency==='RUB')  catGroups[cat].rub+=r.amount;
+    if(r.currency==='USDT') catGroups[cat].usd+=r.amount;
     catGroups[cat].cnt++;
   });
-  const catEntries = Object.entries(catGroups).sort((a,b)=>b[1].vnd+b[1].vony-a[1].vnd-a[1].vony);
-
-  const txRows = [...travelData].reverse();
+  const catEntries = Object.entries(catGroups).sort((a,b)=>(b[1].vnd+b[1].vony)-(a[1].vnd+a[1].vony));
 
   const currPill = {VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd',Воны:'pill-vony'};
+  const txRows = [...travelData].reverse();
 
-  document.getElementById('travelContent').innerHTML = `
+  document.getElementById('travelInner').innerHTML = `
     <div class="travel-header-card">
       <div>
         <h2>✈️ Путешествия</h2>
         <p>${txCount} транзакций · ${days} дней</p>
       </div>
       <div class="travel-total">
-        ${expVnd?`<div class="travel-total-val">${Math.round(expVnd/1000).toLocaleString('ru')}к ₫</div>`:''}
-        ${expVony?`<div style="font-size:18px;font-weight:600;margin-top:2px">${Math.round(expVony).toLocaleString('ru')} ₩</div>`:''}
-        ${expRub?`<div style="font-size:16px;font-weight:500;margin-top:2px;opacity:0.85">${Math.round(expRub).toLocaleString('ru')} ₽</div>`:''}
-        ${expUsd?`<div style="font-size:16px;font-weight:500;margin-top:2px;opacity:0.85">${Math.round(expUsd).toLocaleString('ru')} $</div>`:''}
+        ${expVnd ?`<div class="travel-total-val">${Math.round(expVnd/1000).toLocaleString('ru')}к ₫</div>`:''}
+        ${expVony?`<div style="font-size:20px;font-weight:600;margin-top:2px">${Math.round(expVony).toLocaleString('ru')} ₩</div>`:''}
+        ${expRub ?`<div style="font-size:16px;font-weight:500;margin-top:2px;opacity:0.85">${Math.round(expRub).toLocaleString('ru')} ₽</div>`:''}
+        ${expUsd ?`<div style="font-size:16px;font-weight:500;margin-top:2px;opacity:0.85">${Math.round(expUsd).toLocaleString('ru')} $</div>`:''}
         <div class="travel-total-label">Всего потрачено</div>
       </div>
     </div>
+
+    ${countryCards ? `<div class="travel-stats">${countryCards}</div>` : ''}
 
     <div class="section">
       <div class="section-title travel">По категориям <span style="font-weight:400;font-size:10px;text-transform:none;letter-spacing:0">(нажми для деталей)</span></div>
       <div class="card" style="padding:12px">
         <table class="travel-cat-table">
-          <thead><tr><th>Категория</th><th>Транзакций</th><th style="text-align:right">₫</th><th style="text-align:right">₩</th><th style="text-align:right">₽</th></tr></thead>
+          <thead><tr><th>Категория</th><th>Кол-во</th><th style="text-align:right">🇻🇳 ₫</th><th style="text-align:right">🇰🇷 ₩</th><th style="text-align:right">₽</th></tr></thead>
           <tbody>
             ${catEntries.map(([cat,v])=>`
-              <tr class="travel-cat-row" onclick="openTravelCatModal('${cat.replace(/'/g,"\\'")}')">
+              <tr class="travel-cat-row" onclick="openTravelCatModal('${cat.replace(/'/g,"\\'")}',${JSON.stringify(from)},${JSON.stringify(to)},${JSON.stringify(country)})">
                 <td>${cat}</td>
                 <td style="color:var(--stone-text)">${v.cnt}</td>
-                <td>${v.vnd?Math.round(v.vnd/1000).toLocaleString('ru')+'к':''}</td>
-                <td>${v.vony?Math.round(v.vony).toLocaleString('ru')+'₩':''}</td>
-                <td>${v.rub?Math.round(v.rub).toLocaleString('ru')+'₽':''}</td>
+                <td>${v.vnd?Math.round(v.vnd/1000).toLocaleString('ru')+'к':'—'}</td>
+                <td>${v.vony?Math.round(v.vony).toLocaleString('ru')+'₩':'—'}</td>
+                <td>${v.rub?Math.round(v.rub).toLocaleString('ru')+'₽':'—'}</td>
               </tr>`).join('')}
           </tbody>
         </table>
@@ -770,10 +860,11 @@ function renderTravel() {
       <div class="card" style="padding:12px">
         <div style="overflow-x:auto">
           <table class="tx-table">
-            <thead><tr><th>Дата</th><th>Кто</th><th style="text-align:right">Сумма</th><th>Валюта</th><th>Комментарий</th></tr></thead>
+            <thead><tr><th>Дата</th><th>Страна</th><th>Кто</th><th style="text-align:right">Сумма</th><th>Валюта</th><th>Комментарий</th></tr></thead>
             <tbody>
               ${txRows.map(r=>`<tr>
                 <td style="color:var(--stone-text);white-space:nowrap">${r.datetime.slice(0,16)}</td>
+                <td style="font-size:11px">${currencyToCountry(r.currency)}</td>
                 <td>${r.who}</td>
                 <td style="text-align:right;font-weight:500">${Math.round(r.amount).toLocaleString('ru')}</td>
                 <td><span class="pill ${currPill[r.currency]||'pill-type'}">${r.currency}</span></td>
@@ -786,36 +877,34 @@ function renderTravel() {
     </div>`;
 }
 
-function detectTravelCat(comment) {
-  const c = (comment||'').toLowerCase();
-  if(/такси|метро|транспорт|автобус/.test(c)) return '🚕 Транспорт';
-  if(/кофе/.test(c)) return '☕ Кофе';
-  if(/кафе|ресторан|еда|завтрак|обед|ужин|чай|вода|сок|булочка|твистер/.test(c)) return '🍜 Еда и кафе';
-  if(/отель|хостел|жильё|квартира/.test(c)) return '🏨 Проживание';
-  if(/сувенир/.test(c)) return '🎁 Сувениры';
-  if(/очки|шопинг|магазин|одежда/.test(c)) return '🛍 Шопинг';
-  if(/симка|симка/.test(c)) return '📱 Связь';
-  if(/продукт/.test(c)) return '🛒 Продукты';
-  return '📦 Другое';
-}
-
-function openTravelCatModal(cat) {
-  const travelData = allData.filter(r=>r.category==='Путешествия');
+function openTravelCatModal(cat, from, to, country) {
+  const travelData = allData.filter(r => {
+    if(!isTravelRow(r)) return false;
+    if(from && r.date < from) return false;
+    if(to   && r.date > to)   return false;
+    if(country && currencyToCountry(r.currency) !== country) return false;
+    return true;
+  });
   const rows = travelData.filter(r=>detectTravelCat(r.comment||r.category)===cat).sort((a,b)=>b.date.localeCompare(a.date));
-  const totalVnd = rows.filter(r=>r.currency==='VND').reduce((a,r)=>a+r.amount,0);
-  const totalVony = rows.filter(r=>r.currency==='Воны').reduce((a,r)=>a+r.amount,0);
-  const parts=[];
-  if(totalVnd) parts.push(Math.round(totalVnd/1000).toLocaleString('ru')+'к ₫');
-  if(totalVony) parts.push(Math.round(totalVony).toLocaleString('ru')+' ₩');
+
+  // Суммы по каждой валюте
+  const totals = {};
+  rows.forEach(r=>{ totals[r.currency]=(totals[r.currency]||0)+r.amount; });
+  const parts = [];
+  if(totals['VND'])  parts.push(Math.round(totals['VND']/1000).toLocaleString('ru')+'к ₫');
+  if(totals['Воны']) parts.push(Math.round(totals['Воны']).toLocaleString('ru')+' ₩');
+  if(totals['RUB'])  parts.push(Math.round(totals['RUB']).toLocaleString('ru')+' ₽');
+  if(totals['USDT']) parts.push(Math.round(totals['USDT']).toLocaleString('ru')+' $');
+
   const currPill = {VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd',Воны:'pill-vony'};
   document.getElementById('modalTitle').textContent = cat;
   document.getElementById('modalTotal').textContent = `Итого: ${parts.join(' + ')} · ${rows.length} транзакций`;
   document.getElementById('modalBody').innerHTML = rows.map(r=>`
     <tr>
       <td style="color:var(--stone-text);white-space:nowrap">${r.datetime.slice(0,16)}</td>
-      <td>${r.who}</td>
+      <td style="font-size:11px">${currencyToCountry(r.currency)}</td>
       <td style="color:var(--stone-text)">${r.comment}</td>
-      <td><span class="pill ${currPill[r.currency]||'pill-type'}">${Math.round(r.amount).toLocaleString('ru')} ${r.currency==='VND'?'₫':r.currency==='Воны'?'₩':r.currency==='RUB'?'₽':'$'}</span></td>
+      <td><span class="pill ${currPill[r.currency]||'pill-type'}">${fmtAmount(r)}</span></td>
     </tr>`).join('') || '<tr><td colspan="4" class="status">нет транзакций</td></tr>';
   document.getElementById('catModal').classList.add('open');
 }
