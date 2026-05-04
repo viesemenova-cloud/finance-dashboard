@@ -11,17 +11,41 @@
   --cherry: #8B1A1A; --cherry-mid: #C43333; --cherry-light: #F5EAEA;
   --blue: #2A6496; --blue-light: #E8F2FA;
   --green: #1A6B43; --green-light: #E8F5EE;
+  --travel: #7B4F2E; --travel-light: #F5EDE4; --travel-mid: #C4833A;
   --stone: #F0EDE7; --stone-card: #FAFAF8; --stone-dark: #D8D3CA; --stone-text: #6B6560;
   --black: #1A1A1A; --gray: #888780;
 }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--stone); color: var(--black); }
-.header { background: var(--cherry); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+
+/* HEADER */
+.header { background: var(--cherry); padding: 0; display: flex; flex-direction: column; }
+.header-top { padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
 .header h1 { font-size: 17px; font-weight: 500; color: #fff; }
 .header p { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.header-travel { background: var(--travel); }
 .btn { font-size: 12px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 7px 14px; background: rgba(255,255,255,0.12); color: #fff; cursor: pointer; }
 .btn:hover { background: rgba(255,255,255,0.22); }
-.container { max-width: 1140px; margin: 0 auto; padding: 20px 16px; }
 
+/* TABS */
+.tabs { display: flex; border-top: 1px solid rgba(255,255,255,0.15); }
+.tab { padding: 10px 22px; font-size: 13px; color: rgba(255,255,255,0.6); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab:hover { color: rgba(255,255,255,0.9); }
+.tab.active { color: #fff; border-bottom-color: #fff; font-weight: 500; }
+.tab-travel.active { border-bottom-color: #F5C87A; color: #F5C87A; }
+
+.container { max-width: 1140px; margin: 0 auto; padding: 20px 16px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* FILTERS */
+.filters { background: #fff; border-radius: 12px; border: 1px solid var(--stone-dark); padding: 12px 16px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.filters label { font-size: 12px; color: var(--stone-text); }
+.filters input, .filters select { font-size: 12px; border: 1px solid var(--stone-dark); border-radius: 7px; padding: 5px 9px; background: var(--stone); color: var(--black); outline: none; }
+.filter-btn { font-size: 12px; border-radius: 7px; padding: 5px 13px; cursor: pointer; border: 1px solid var(--stone-dark); background: var(--stone); color: var(--black); }
+.filter-btn-apply { background: var(--cherry); color: #fff; border-color: var(--cherry); }
+.filter-btn-apply:hover { background: var(--cherry-mid); }
+
+/* SECTION TITLES */
 .section { margin-bottom: 20px; }
 .section-title { font-size: 10px; font-weight: 500; color: var(--cherry); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 .section-title::before { content:''; display:block; width:3px; height:12px; background:var(--cherry); border-radius:2px; }
@@ -31,54 +55,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .section-title.green::before { background: var(--green); }
 .section-title.gray { color: var(--gray); }
 .section-title.gray::before { background: var(--gray); }
-
+.section-title.travel { color: var(--travel); }
+.section-title.travel::before { background: var(--travel); }
 .card { background: #fff; border-radius: 13px; border: 1px solid var(--stone-dark); padding: 16px; }
 
-/* Фильтры */
-.filters { background: #fff; border-radius: 12px; border: 1px solid var(--stone-dark); padding: 12px 16px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.filters label { font-size: 12px; color: var(--stone-text); }
-.filters input, .filters select { font-size: 12px; border: 1px solid var(--stone-dark); border-radius: 7px; padding: 5px 9px; background: var(--stone); color: var(--black); outline: none; }
-.filter-btn { font-size: 12px; border-radius: 7px; padding: 5px 13px; cursor: pointer; border: 1px solid var(--stone-dark); background: var(--stone); color: var(--black); }
-.filter-btn-apply { background: var(--cherry); color: #fff; border-color: var(--cherry); }
-
-/* Остатки */
-.balances { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-.balance-card { background: #fff; border-radius: 13px; border: 1px solid var(--stone-dark); padding: 16px 18px; }
-.balance-card.vnd { border-top: 3px solid var(--green); }
-.balance-card.rub { border-top: 3px solid var(--cherry); }
-.balance-card.usd { border-top: 3px solid var(--blue); }
-.balance-label { font-size: 11px; color: var(--stone-text); margin-bottom: 6px; }
-.balance-val { font-size: 26px; font-weight: 500; }
-.balance-val.pos { color: var(--green); }
-.balance-val.neg { color: var(--cherry); }
-.balance-detail { font-size: 11px; color: var(--stone-text); margin-top: 6px; line-height: 1.6; }
-.balance-edit { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
-.balance-edit input { font-size: 12px; border: 1px solid var(--stone-dark); border-radius: 6px; padding: 4px 8px; width: 120px; background: var(--stone); color: var(--black); }
-.balance-edit button { font-size: 11px; border: 1px solid var(--stone-dark); border-radius: 6px; padding: 4px 10px; cursor: pointer; background: var(--stone); color: var(--black); }
-.balance-edit button:hover { background: var(--stone-dark); }
-
-/* Приходы */
+/* INCOME GRID */
 .income-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
 .income-item { background: var(--stone); border-radius: 10px; padding: 12px 14px; }
 .income-item-label { font-size: 11px; color: var(--stone-text); margin-bottom: 4px; }
 .income-item-val { font-size: 17px; font-weight: 500; color: var(--black); }
 .income-item-sub { font-size: 11px; color: var(--stone-text); margin-top: 2px; }
 
-/* Таблицы категорий */
+/* CAT TABLE — clickable */
 .cat-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
-.cat-col-title { font-size: 11px; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
-.cat-col-title.ch { color: var(--cherry); }
-.cat-col-title.ch::before { content:''; display:block; width:3px; height:11px; background:var(--cherry); border-radius:2px; }
-.cat-col-title.bl { color: var(--blue); }
-.cat-col-title.bl::before { content:''; display:block; width:3px; height:11px; background:var(--blue); border-radius:2px; }
-.cat-col-title.gr { color: var(--gray); }
-.cat-col-title.gr::before { content:''; display:block; width:3px; height:11px; background:var(--gray); border-radius:2px; }
 .cat-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .cat-table th { text-align: left; font-weight: 500; color: var(--stone-text); font-size: 10px; padding: 3px 6px; border-bottom: 1px solid var(--stone-dark); }
 .cat-table th:last-child { text-align: right; }
 .cat-table td { padding: 5px 6px; border-bottom: 1px solid var(--stone); }
 .cat-table td:last-child { text-align: right; font-weight: 500; }
 .cat-table tr:last-child td { border-bottom: none; }
+.cat-row { cursor: pointer; transition: background 0.15s; }
+.cat-row:hover td { background: var(--cherry-light) !important; }
 .total-row td { border-top: 1px solid var(--stone-dark) !important; border-bottom: none !important; font-weight: 500; }
 .total-row.ch td { color: var(--cherry); }
 .total-row.bl td { color: var(--blue); }
@@ -86,16 +83,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .pct-bar { height: 4px; background: var(--stone-dark); border-radius: 2px; margin-top: 3px; }
 .pct-fill { height: 4px; border-radius: 2px; background: var(--cherry); }
 .pct-fill.bl { background: var(--blue); }
+.cat-col-title { font-size: 11px; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+.cat-col-title.ch { color: var(--cherry); }
+.cat-col-title.ch::before { content:''; display:block; width:3px; height:11px; background:var(--cherry); border-radius:2px; }
+.cat-col-title.bl { color: var(--blue); }
+.cat-col-title.bl::before { content:''; display:block; width:3px; height:11px; background:var(--blue); border-radius:2px; }
+.cat-col-title.gr { color: var(--gray); }
+.cat-col-title.gr::before { content:''; display:block; width:3px; height:11px; background:var(--gray); border-radius:2px; }
 
-/* Топ */
+/* TOP CATS */
 .top-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
-.top-item { background: var(--stone); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; }
+.top-item { background: var(--stone); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.15s; }
+.top-item:hover { background: var(--cherry-light); }
 .top-rank { font-size: 18px; font-weight: 500; color: var(--stone-dark); min-width: 24px; }
 .top-cat { font-size: 12px; font-weight: 500; }
 .top-amt { font-size: 12px; color: var(--stone-text); margin-top: 2px; }
 .top-pct { font-size: 11px; color: var(--cherry); margin-left: auto; font-weight: 500; }
 
-/* Транзакции */
+/* TX TABLE */
 .tx-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .tx-table th { text-align: left; font-weight: 500; color: var(--stone-text); font-size: 10px; padding: 4px 8px; border-bottom: 1px solid var(--stone-dark); }
 .tx-table td { padding: 6px 8px; border-bottom: 1px solid var(--stone); }
@@ -105,31 +110,115 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .pill-vnd { background: var(--green-light); color: var(--green); }
 .pill-rub { background: var(--cherry-light); color: var(--cherry); }
 .pill-usd { background: var(--blue-light); color: var(--blue); }
+.pill-vony { background: #EDF3EA; color: #3A6B30; }
 .pill-type { background: var(--stone); color: var(--gray); }
 .pill-income { background: var(--green-light); color: var(--green); }
+.pill-travel { background: var(--travel-light); color: var(--travel); }
 
+/* MODAL */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; align-items:center; justify-content:center; }
+.modal-overlay.open { display:flex; }
+.modal { background:#fff; border-radius:16px; width:90%; max-width:600px; max-height:80vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2); }
+.modal-header { padding:16px 20px; border-bottom:1px solid var(--stone-dark); display:flex; align-items:center; justify-content:space-between; }
+.modal-title { font-size:15px; font-weight:600; }
+.modal-total { font-size:13px; color:var(--stone-text); margin-top:2px; }
+.modal-close { font-size:20px; cursor:pointer; color:var(--stone-text); line-height:1; padding:4px; }
+.modal-close:hover { color:var(--black); }
+.modal-body { overflow-y:auto; padding:12px; flex:1; }
+.modal-tx-table { width:100%; border-collapse:collapse; font-size:12px; }
+.modal-tx-table th { text-align:left; font-weight:500; color:var(--stone-text); font-size:10px; padding:4px 8px; border-bottom:1px solid var(--stone-dark); }
+.modal-tx-table td { padding:7px 8px; border-bottom:1px solid var(--stone); }
+.modal-tx-table tr:last-child td { border-bottom:none; }
+.modal-tx-table td:last-child { text-align:right; font-weight:500; }
+
+/* COMPARISON TABLE */
+.cmp-table { width:100%; border-collapse:collapse; font-size:12px; }
+.cmp-table th { text-align:left; font-weight:500; color:var(--stone-text); font-size:10px; padding:5px 8px; border-bottom:1px solid var(--stone-dark); }
+.cmp-table th:not(:first-child) { text-align:right; }
+.cmp-table td { padding:7px 8px; border-bottom:1px solid var(--stone); }
+.cmp-table td:not(:first-child) { text-align:right; }
+.cmp-table tr:last-child td { border-bottom:none; }
+.delta-up { color: var(--cherry); font-weight:500; }
+.delta-down { color: var(--green); font-weight:500; }
+.delta-same { color: var(--stone-text); }
+.cmp-period-toggle { display:flex; gap:6px; margin-bottom:12px; }
+.cmp-period-btn { font-size:11px; padding:4px 12px; border-radius:7px; border:1px solid var(--stone-dark); background:var(--stone); cursor:pointer; color:var(--black); }
+.cmp-period-btn.active { background:var(--cherry); color:#fff; border-color:var(--cherry); }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .status { text-align: center; padding: 2rem; color: var(--stone-text); font-size: 13px; }
 .err { color: var(--cherry); }
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+/* TRAVEL PAGE */
+.travel-header-card { background: linear-gradient(135deg, var(--travel) 0%, #A06030 100%); border-radius: 13px; padding: 20px 24px; color: #fff; margin-bottom: 20px; display:flex; align-items:center; justify-content:space-between; }
+.travel-header-card h2 { font-size: 20px; font-weight: 600; }
+.travel-header-card p { font-size: 13px; opacity: 0.75; margin-top: 4px; }
+.travel-total { text-align:right; }
+.travel-total-val { font-size: 28px; font-weight: 600; }
+.travel-total-label { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+.travel-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+.travel-stat { background:#fff; border-radius:11px; border:1px solid var(--stone-dark); padding:14px 16px; }
+.travel-stat-label { font-size:11px; color:var(--stone-text); margin-bottom:4px; }
+.travel-stat-val { font-size:18px; font-weight:600; color:var(--travel); }
+.travel-stat-sub { font-size:11px; color:var(--stone-text); margin-top:3px; }
+
+.travel-cat-table { width:100%; border-collapse:collapse; font-size:12px; }
+.travel-cat-table th { text-align:left; font-weight:500; color:var(--stone-text); font-size:10px; padding:4px 8px; border-bottom:1px solid var(--stone-dark); }
+.travel-cat-table th:last-child { text-align:right; }
+.travel-cat-table td { padding:7px 8px; border-bottom:1px solid var(--stone); }
+.travel-cat-table td:last-child { text-align:right; font-weight:500; }
+.travel-cat-table tr:last-child td { border-bottom:none; }
+.travel-cat-row { cursor:pointer; transition:background 0.15s; }
+.travel-cat-row:hover td { background: var(--travel-light) !important; }
+
 @media (max-width: 700px) {
-  .balances { grid-template-columns: 1fr; }
   .cat-grid { grid-template-columns: 1fr; }
   .two-col { grid-template-columns: 1fr; }
   .top-row { grid-template-columns: 1fr; }
+  .travel-stats { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <h1>Личные финансы</h1>
-    <p id="lastUpdated">Загрузка...</p>
+<div class="header" id="mainHeader">
+  <div class="header-top">
+    <div>
+      <h1 id="headerTitle">Личные финансы</h1>
+      <p id="lastUpdated">Загрузка...</p>
+    </div>
+    <button class="btn" onclick="loadData()">↻ Обновить</button>
   </div>
-  <button class="btn" onclick="loadData()">↻ Обновить</button>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('main')">📊 Основной</div>
+    <div class="tab tab-travel" onclick="switchTab('travel')">✈️ Путешествие</div>
+  </div>
+</div>
+
+<!-- MODAL CATEGORY DETAIL -->
+<div class="modal-overlay" id="catModal" onclick="closeCatModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle">Категория</div>
+        <div class="modal-total" id="modalTotal"></div>
+      </div>
+      <span class="modal-close" onclick="closeCatModalDirect()">✕</span>
+    </div>
+    <div class="modal-body">
+      <table class="modal-tx-table">
+        <thead><tr><th>Дата</th><th>Кто</th><th>Комментарий</th><th>Сумма</th></tr></thead>
+        <tbody id="modalBody"></tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <div class="container">
+
+<!-- ======== MAIN PAGE ======== -->
+<div class="page active" id="page-main">
 
   <div class="filters">
     <label>С</label><input type="date" id="dateFrom">
@@ -140,27 +229,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <button class="filter-btn" onclick="resetFilters()">Сброс</button>
   </div>
 
-  <!-- ОСТАТКИ НА РУКАХ -->
-  <div class="section">
-    <div class="section-title green">Остатки на руках (за всё время)</div>
-    <div class="balances" id="balances">
-      <div class="status">Загрузка...</div>
-    </div>
-  </div>
-
   <!-- ПРИХОДЫ -->
   <div class="section">
     <div class="section-title green">Приходы за период</div>
     <div class="card">
-      <div class="income-grid" id="incomeGrid">
-        <div class="status">Загрузка...</div>
-      </div>
+      <div class="income-grid" id="incomeGrid"><div class="status">Загрузка...</div></div>
     </div>
   </div>
 
   <!-- РАСХОДЫ ПО КАТЕГОРИЯМ -->
   <div class="section">
-    <div class="section-title">Расходы по категориям за период</div>
+    <div class="section-title">Расходы по категориям <span style="font-weight:400;font-size:10px;text-transform:none;letter-spacing:0">(нажми на категорию для деталей)</span></div>
     <div class="two-col" style="margin-bottom:12px">
       <div class="card" style="padding:12px">
         <div style="position:relative;height:200px"><canvas id="cCatVnd"></canvas></div>
@@ -172,9 +251,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       </div>
     </div>
     <div class="card">
-      <div class="cat-grid" id="catGrid">
-        <div class="status">Загрузка...</div>
-      </div>
+      <div class="cat-grid" id="catGrid"><div class="status">Загрузка...</div></div>
     </div>
   </div>
 
@@ -182,6 +259,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="section">
     <div class="section-title">Топ расходов в ₫ за период</div>
     <div class="top-row" id="topCats"></div>
+  </div>
+
+  <!-- СРАВНЕНИЕ С ПРОШЛЫМ МЕСЯЦЕМ -->
+  <div class="section">
+    <div class="section-title">Сравнение с прошлым месяцем</div>
+    <div class="card">
+      <div class="cmp-period-toggle">
+        <button class="cmp-period-btn active" id="cmpBtnCurrent" onclick="setCmpMode('current')">Текущий месяц</button>
+        <button class="cmp-period-btn" id="cmpBtnFiltered" onclick="setCmpMode('filtered')">Выбранный период</button>
+      </div>
+      <div id="cmpContent"><div class="status">Загрузка...</div></div>
+    </div>
   </div>
 
   <!-- ВСЕ ТРАНЗАКЦИИ -->
@@ -199,13 +288,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 </div>
 
+<!-- ======== TRAVEL PAGE ======== -->
+<div class="page" id="page-travel">
+  <div id="travelContent"><div class="status">Загрузка...</div></div>
+</div>
+
+</div><!-- /container -->
+
 <script>
 const SHEET_ID = '1fyExlrroNUS6idq5VyWyl7_CHAaYyGBGVJAiTUzQVSk';
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('Транзакции')}`;
 const COLORS = ['#8B1A1A','#C43333','#E07070','#F5C2C2','#5C1111','#A52A2A','#D4706F','#2A6496','#4A90C4','#888780'];
+const TRAVEL_COLORS = ['#7B4F2E','#C4833A','#E0A870','#F5D5B0','#4A2E18','#A06030','#D49060','#5C7A3E','#8AAF60','#AAA08A'];
 
-let allData = [], filtered = [], balAdj = {VND:0, RUB:0, USDT:0};
+let allData = [], filtered = [];
 let charts = {};
+let cmpMode = 'current';
+let currentTab = 'main';
 
 function parseCSV(text) {
   const rows = []; const lines = text.trim().split('\n').slice(1);
@@ -241,7 +340,7 @@ async function loadData() {
     document.getElementById('lastUpdated').textContent='Обновлено: '+new Date().toLocaleString('ru');
   } catch(e) {
     document.getElementById('lastUpdated').textContent='Ошибка: '+e.message;
-    document.getElementById('balances').innerHTML=`<div class="status err">Ошибка загрузки. Убедись что таблица открыта для всех по ссылке.</div>`;
+    document.getElementById('incomeGrid').innerHTML=`<div class="status err">Ошибка загрузки. Убедись что таблица открыта для всех по ссылке.</div>`;
   }
 }
 
@@ -271,71 +370,38 @@ function resetFilters() {
   render();
 }
 
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active', (i===0&&tab==='main')||(i===1&&tab==='travel'));
+  });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  const header = document.getElementById('mainHeader');
+  if(tab==='travel') {
+    header.classList.add('header-travel');
+    document.getElementById('headerTitle').textContent = '✈️ Режим путешествия';
+    renderTravel();
+  } else {
+    header.classList.remove('header-travel');
+    document.getElementById('headerTitle').textContent = 'Личные финансы';
+  }
+}
+
+// ===== HELPERS =====
 function sum(data,type,curr) {
   return data.filter(r=>r.type===type&&r.currency===curr).reduce((a,r)=>a+r.amount,0);
 }
-
-function sumIncome(data, source) {
-  return data.filter(r=>r.type==='приход'&&r.category.toLowerCase()===source.toLowerCase()).reduce((a,r)=>a+r.amount,0);
+function groupByCat(data, curr, type='расход') {
+  const map={};
+  data.filter(r=>r.type===type&&r.currency===curr).forEach(r=>{
+    map[r.category]=(map[r.category]||0)+r.amount;
+  });
+  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
 }
 
-// ОСТАТКИ — считаем по ВСЕМ данным
-function renderBalances() {
-  const cashVnd = sum(allData,'кэш','VND');
-  const expVnd  = sum(allData,'расход','VND');
-  const incRub  = sum(allData,'приход','RUB');
-  const expRub  = sum(allData,'расход','RUB');
-  const incUsd  = sum(allData,'приход','USDT');
-  const expUsd  = sum(allData,'расход','USDT');
-
-  const balVnd = cashVnd - expVnd + balAdj.VND;
-  const balRub = incRub  - expRub + balAdj.RUB;
-  const balUsd = incUsd  - expUsd + balAdj.USDT;
-
-  const fVnd = v => Math.round(v/1000).toLocaleString('ru')+'к ₫';
-  const fRub = v => Math.round(v).toLocaleString('ru')+' ₽';
-  const fUsd = v => Math.round(v).toLocaleString('ru')+' $';
-
-  document.getElementById('balances').innerHTML = `
-    <div class="balance-card vnd">
-      <div class="balance-label">Остаток ₫ (наличные)</div>
-      <div class="balance-val ${balVnd>=0?'pos':'neg'}">${fVnd(balVnd)}</div>
-      <div class="balance-detail">Получено: ${fVnd(cashVnd)}<br>Потрачено: ${fVnd(expVnd)}</div>
-      <div class="balance-edit">
-        <input type="number" id="adjVnd" placeholder="Поправка" value="${balAdj.VND||''}" />
-        <button onclick="saveAdj('VND')">Сохранить</button>
-      </div>
-    </div>
-    <div class="balance-card rub">
-      <div class="balance-label">Остаток ₽</div>
-      <div class="balance-val ${balRub>=0?'pos':'neg'}">${fRub(balRub)}</div>
-      <div class="balance-detail">Получено: ${fRub(incRub)}<br>Потрачено: ${fRub(expRub)}</div>
-      <div class="balance-edit">
-        <input type="number" id="adjRub" placeholder="Поправка" value="${balAdj.RUB||''}" />
-        <button onclick="saveAdj('RUB')">Сохранить</button>
-      </div>
-    </div>
-    <div class="balance-card usd">
-      <div class="balance-label">Остаток $</div>
-      <div class="balance-val ${balUsd>=0?'pos':'neg'}">${fUsd(balUsd)}</div>
-      <div class="balance-detail">Получено: ${fUsd(incUsd)}<br>Потрачено: ${fUsd(expUsd)}</div>
-      <div class="balance-edit">
-        <input type="number" id="adjUSD" placeholder="Поправка" value="${balAdj.USDT||''}" />
-        <button onclick="saveAdj('USDT')">Сохранить</button>
-      </div>
-    </div>`;
-}
-
-function saveAdj(curr) {
-  const idMap = {VND:'adjVnd', RUB:'adjRub', USDT:'adjUSD'};
-  const val = parseFloat(document.getElementById(idMap[curr]).value) || 0;
-  balAdj[curr] = val;
-  renderBalances();
-}
-
-// ПРИХОДЫ за период
+// ===== INCOME =====
 function renderIncome() {
-  const sintexRub = sumIncome(filtered,'Синтекс') + filtered.filter(r=>r.type==='приход'&&r.currency==='RUB'&&r.category.toLowerCase()==='синтекс').reduce((a,r)=>a+r.amount,0);
   const sintRub = filtered.filter(r=>r.type==='приход'&&r.currency==='RUB'&&r.category.toLowerCase().includes('синтекс')).reduce((a,r)=>a+r.amount,0);
   const sintUsd = filtered.filter(r=>r.type==='приход'&&r.currency==='USDT'&&r.category.toLowerCase().includes('синтекс')).reduce((a,r)=>a+r.amount,0);
   const bizRub  = filtered.filter(r=>r.type==='приход'&&r.currency==='RUB'&&r.category.toLowerCase().includes('бизнес')).reduce((a,r)=>a+r.amount,0);
@@ -344,32 +410,21 @@ function renderIncome() {
   const otherUsd= filtered.filter(r=>r.type==='приход'&&r.currency==='USDT'&&!r.category.toLowerCase().includes('синтекс')&&!r.category.toLowerCase().includes('бизнес')).reduce((a,r)=>a+r.amount,0);
   const otherVnd= filtered.filter(r=>r.type==='приход'&&r.currency==='VND').reduce((a,r)=>a+r.amount,0);
   const cashVnd = sum(filtered,'кэш','VND');
-
-  // Other sources breakdown
   const otherSources = {};
   filtered.filter(r=>r.type==='приход'&&!r.category.toLowerCase().includes('синтекс')&&!r.category.toLowerCase().includes('бизнес')).forEach(r=>{
     const key = r.category||'Другое';
     if(!otherSources[key]) otherSources[key]={RUB:0,USDT:0,VND:0};
     otherSources[key][r.currency]=(otherSources[key][r.currency]||0)+r.amount;
   });
-
   const fR=v=>Math.round(v).toLocaleString('ru');
   const fD=v=>Math.round(v/1000).toLocaleString('ru');
-
   const items = [
-    { label:'Синтекс', val: (sintRub?fR(sintRub)+' ₽':'') + (sintRub&&sintUsd?' / ':'') + (sintUsd?fR(sintUsd)+' $':'') || '—', sub:'' },
-    { label:'Бизнес',  val: (bizRub?fR(bizRub)+' ₽':'') + (bizRub&&bizUsd?' / ':'') + (bizUsd?fR(bizUsd)+' $':'') || '—', sub:'' },
+    { label:'Синтекс', val: (sintRub?fR(sintRub)+' ₽':'') + (sintRub&&sintUsd?' / ':'') + (sintUsd?fR(sintUsd)+' $':'') || '—' },
+    { label:'Бизнес',  val: (bizRub?fR(bizRub)+' ₽':'') + (bizRub&&bizUsd?' / ':'') + (bizUsd?fR(bizUsd)+' $':'') || '—' },
     { label:'Другое',  val: (otherRub?fR(otherRub)+' ₽':'') + (otherRub&&otherUsd?' + ':'') + (otherUsd?fR(otherUsd)+' $':'') + (otherVnd?' + '+fD(otherVnd)+'к ₫':'') || '—',
-      sub: Object.entries(otherSources).map(([k,v])=>{
-        const parts=[];
-        if(v.RUB) parts.push(fR(v.RUB)+' ₽');
-        if(v.USDT) parts.push(fR(v.USDT)+' $');
-        if(v.VND) parts.push(fD(v.VND)+'к ₫');
-        return k+': '+parts.join(' + ');
-      }).join(' • ') },
-    { label:'Кэш получено ₫', val: fD(cashVnd)+'к ₫', sub:'' },
+      sub: Object.entries(otherSources).map(([k,v])=>{ const parts=[];if(v.RUB)parts.push(fR(v.RUB)+' ₽');if(v.USDT)parts.push(fR(v.USDT)+' $');if(v.VND)parts.push(fD(v.VND)+'к ₫');return k+': '+parts.join(' + ');}).join(' • ') },
+    { label:'Кэш получено ₫', val: fD(cashVnd)+'к ₫' },
   ];
-
   document.getElementById('incomeGrid').innerHTML = items.map(item=>`
     <div class="income-item">
       <div class="income-item-label">${item.label}</div>
@@ -378,47 +433,58 @@ function renderIncome() {
     </div>`).join('');
 }
 
-// РАСХОДЫ ПО КАТЕГОРИЯМ
-function groupByCat(curr) {
-  const map={};
-  filtered.filter(r=>r.type==='расход'&&r.currency===curr).forEach(r=>{
-    map[r.category]=(map[r.category]||0)+r.amount;
-  });
-  return Object.entries(map).sort((a,b)=>b[1]-a[1]);
-}
-
+// ===== CHARTS =====
 function mkLegend(id,entries,colors) {
   document.getElementById(id).innerHTML=entries.map((e,i)=>
     `<span style="display:flex;align-items:center;gap:3px"><span style="width:8px;height:8px;border-radius:2px;background:${colors[i%colors.length]};flex-shrink:0"></span>${e[0]}</span>`
   ).join('');
 }
-
 function mkChart(id,type,labels,datasets,opts={}) {
   if(charts[id]) charts[id].destroy();
   const ctx=document.getElementById(id);
   if(!ctx) return;
   charts[id]=new Chart(ctx,{type,data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},...opts}});
 }
-
-function renderCatChart(canvasId,legId,curr) {
-  const entries=groupByCat(curr);
-  mkLegend(legId,entries,COLORS);
+function renderCatChart(canvasId,legId,curr,colors) {
+  const entries=groupByCat(filtered,curr);
+  mkLegend(legId,entries,colors||COLORS);
   const div=curr==='VND'?1000:1;
   const suf=curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
   mkChart(canvasId,'doughnut',entries.map(e=>e[0]),[{
     data:entries.map(e=>Math.round(e[1]/div)),
-    backgroundColor:COLORS.slice(0,entries.length),
+    backgroundColor:(colors||COLORS).slice(0,entries.length),
     borderWidth:2,borderColor:'#fff'
   }],{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.raw.toLocaleString('ru')}${suf}`}}}});
 }
 
+// ===== CAT TABLE with click =====
+function openCatModal(cat, curr, data) {
+  const rows = (data||filtered).filter(r=>r.type==='расход'&&r.currency===curr&&r.category===cat).sort((a,b)=>b.date.localeCompare(a.date));
+  const total = rows.reduce((a,r)=>a+r.amount,0);
+  const div = curr==='VND'?1000:1;
+  const suf = curr==='VND'?'к ₫':curr==='RUB'?' ₽':' $';
+  document.getElementById('modalTitle').textContent = cat;
+  document.getElementById('modalTotal').textContent = `Итого: ${Math.round(total/div).toLocaleString('ru')}${suf} · ${rows.length} транзакций`;
+  const currPill = {VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd'};
+  document.getElementById('modalBody').innerHTML = rows.map(r=>`
+    <tr>
+      <td style="color:var(--stone-text);white-space:nowrap">${r.datetime.slice(0,16)}</td>
+      <td>${r.who}</td>
+      <td style="color:var(--stone-text)">${r.comment}</td>
+      <td><span class="pill ${currPill[r.currency]||''}">${Math.round(r.amount).toLocaleString('ru')} ${r.currency==='VND'?'₫':r.currency==='RUB'?'₽':'$'}</span></td>
+    </tr>`).join('') || '<tr><td colspan="4" class="status">нет транзакций</td></tr>';
+  document.getElementById('catModal').classList.add('open');
+}
+function closeCatModal(e) { if(e.target===document.getElementById('catModal')) closeCatModalDirect(); }
+function closeCatModalDirect() { document.getElementById('catModal').classList.remove('open'); }
+
 function renderCatTable() {
   const doCol=(curr,cls,suf,div)=>{
-    const entries=groupByCat(curr);
+    const entries=groupByCat(filtered,curr);
     const total=entries.reduce((a,e)=>a+e[1],0);
     const rows=entries.map(([cat,amt])=>{
       const pct=total>0?Math.round(amt/total*100):0;
-      return `<tr>
+      return `<tr class="cat-row" onclick="openCatModal('${cat.replace(/'/g,"\\'")}','${curr}')">
         <td>${cat}<div class="pct-bar"><div class="pct-fill ${cls==='bl'?'bl':''}" style="width:${pct}%"></div></div></td>
         <td>${Math.round(amt/div).toLocaleString('ru')}${suf} <span style="color:var(--stone-text);font-size:10px">${pct}%</span></td>
       </tr>`;
@@ -429,18 +495,16 @@ function renderCatTable() {
       <table class="cat-table"><thead><tr><th>Категория</th><th>Сумма</th></tr></thead><tbody>${rows}${totalRow}</tbody></table>
     </div>`;
   };
-  document.getElementById('catGrid').innerHTML=
-    doCol('VND','ch','к ₫',1000)+
-    doCol('RUB','bl',' ₽',1)+
-    doCol('USDT','gr',' $',1);
+  document.getElementById('catGrid').innerHTML=doCol('VND','ch','к ₫',1000)+doCol('RUB','bl',' ₽',1)+doCol('USDT','gr',' $',1);
 }
 
+// ===== TOP CATS =====
 function renderTopCats() {
-  const entries=groupByCat('VND').slice(0,3);
-  const total=groupByCat('VND').reduce((a,e)=>a+e[1],0);
+  const entries=groupByCat(filtered,'VND').slice(0,3);
+  const total=groupByCat(filtered,'VND').reduce((a,e)=>a+e[1],0);
   if(!entries.length){ document.getElementById('topCats').innerHTML='<div style="color:var(--stone-text);font-size:13px">нет данных</div>'; return; }
   document.getElementById('topCats').innerHTML=entries.map(([cat,amt],i)=>`
-    <div class="top-item">
+    <div class="top-item" onclick="openCatModal('${cat.replace(/'/g,"\\'")}','VND')">
       <div class="top-rank">${i+1}</div>
       <div>
         <div class="top-cat">${cat}</div>
@@ -450,31 +514,273 @@ function renderTopCats() {
     </div>`).join('');
 }
 
+// ===== COMPARISON =====
+function setCmpMode(mode) {
+  cmpMode = mode;
+  document.getElementById('cmpBtnCurrent').classList.toggle('active', mode==='current');
+  document.getElementById('cmpBtnFiltered').classList.toggle('active', mode==='filtered');
+  renderComparison();
+}
+
+function getMonthRange(offset) {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth()+offset;
+  const start = new Date(y, m, 1);
+  const end = new Date(y, m+1, 0);
+  return {
+    from: start.toISOString().slice(0,10),
+    to: end.toISOString().slice(0,10)
+  };
+}
+
+function renderComparison() {
+  let curFrom, curTo, prevFrom, prevTo;
+
+  if(cmpMode==='current') {
+    const cur = getMonthRange(0);
+    const prev = getMonthRange(-1);
+    curFrom=cur.from; curTo=cur.to;
+    prevFrom=prev.from; prevTo=prev.to;
+  } else {
+    // Use filtered period, prev = same duration shifted back
+    const from = document.getElementById('dateFrom').value;
+    const to = document.getElementById('dateTo').value;
+    if(!from||!to) {
+      document.getElementById('cmpContent').innerHTML='<div class="status" style="padding:1rem">Задай период в фильтрах</div>';
+      return;
+    }
+    curFrom=from; curTo=to;
+    const dur = (new Date(to)-new Date(from)); // ms
+    const prevToDate = new Date(new Date(from).getTime()-1);
+    const prevFromDate = new Date(prevToDate.getTime()-dur);
+    prevFrom=prevFromDate.toISOString().slice(0,10);
+    prevTo=prevToDate.toISOString().slice(0,10);
+  }
+
+  const curData = allData.filter(r=>r.date>=curFrom&&r.date<=curTo);
+  const prevData = allData.filter(r=>r.date>=prevFrom&&r.date<=prevTo);
+
+  const allCats = [...new Set([
+    ...groupByCat(curData,'VND').map(e=>e[0]),
+    ...groupByCat(prevData,'VND').map(e=>e[0])
+  ])];
+
+  const curMap={}, prevMap={};
+  groupByCat(curData,'VND').forEach(([c,v])=>curMap[c]=v);
+  groupByCat(prevData,'VND').forEach(([c,v])=>prevMap[c]=v);
+
+  const rows = allCats.map(cat=>{
+    const cur=curMap[cat]||0, prev=prevMap[cat]||0;
+    let delta='', cls='delta-same';
+    if(prev>0) {
+      const pct=Math.round((cur-prev)/prev*100);
+      if(pct>0){ delta=`+${pct}%`; cls='delta-up'; }
+      else if(pct<0){ delta=`${pct}%`; cls='delta-down'; }
+      else delta='0%';
+    } else if(cur>0) { delta='новое'; cls='delta-up'; }
+    return {cat,cur,prev,delta,cls};
+  }).sort((a,b)=>b.cur-a.cur);
+
+  const curTotal=rows.reduce((a,r)=>a+r.cur,0);
+  const prevTotal=rows.reduce((a,r)=>a+r.prev,0);
+  const totalDelta=prevTotal>0?Math.round((curTotal-prevTotal)/prevTotal*100):0;
+  const totalCls=totalDelta>0?'delta-up':totalDelta<0?'delta-down':'delta-same';
+  const totalSign=totalDelta>0?'+':'';
+
+  const prevLabel = cmpMode==='current'
+    ? new Date(prevFrom).toLocaleString('ru',{month:'long'})
+    : `${prevFrom} — ${prevTo}`;
+  const curLabel = cmpMode==='current'
+    ? new Date(curFrom).toLocaleString('ru',{month:'long'})
+    : `${curFrom} — ${curTo}`;
+
+  document.getElementById('cmpContent').innerHTML = `
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th>Категория</th>
+          <th>${prevLabel}</th>
+          <th>${curLabel}</th>
+          <th>Изменение</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>`<tr>
+          <td>${r.cat}</td>
+          <td style="color:var(--stone-text)">${r.prev?Math.round(r.prev/1000).toLocaleString('ru')+'к ₫':'—'}</td>
+          <td>${r.cur?Math.round(r.cur/1000).toLocaleString('ru')+'к ₫':'—'}</td>
+          <td class="${r.cls}">${r.delta}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="font-weight:600;border-top:1px solid var(--stone-dark)">
+          <td>Итого ₫</td>
+          <td style="color:var(--stone-text)">${Math.round(prevTotal/1000).toLocaleString('ru')}к</td>
+          <td>${Math.round(curTotal/1000).toLocaleString('ru')}к</td>
+          <td class="${totalCls}">${totalSign}${totalDelta}%</td>
+        </tr>
+      </tfoot>
+    </table>`;
+}
+
+// ===== TX TABLE =====
 function renderTable() {
   const rows=[...filtered].reverse().slice(0,300);
   document.getElementById('txCount').textContent=`(${filtered.length})`;
-  const pill={VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd'};
-  const typeClass={приход:'pill-income',расход:'pill-type',кэш:'pill-type',путешествие:'pill-type'};
+  const pill={VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd',Воны:'pill-vony'};
+  const typeClass={приход:'pill-income',расход:'pill-type',кэш:'pill-type',путешествие:'pill-travel'};
   document.getElementById('txBody').innerHTML=rows.map(r=>`
     <tr>
       <td style="color:var(--stone-text)">${r.datetime.slice(0,16)}</td>
       <td>${r.who}</td>
       <td><span class="pill ${typeClass[r.type]||'pill-type'}">${r.type}</span></td>
       <td style="text-align:right;font-weight:500">${Math.round(r.amount).toLocaleString('ru')}</td>
-      <td><span class="pill ${pill[r.currency]||''}">${r.currency}</span></td>
+      <td><span class="pill ${pill[r.currency]||'pill-type'}">${r.currency}</span></td>
       <td>${r.category}</td>
       <td style="color:var(--stone-text)">${r.comment}</td>
     </tr>`).join('');
 }
 
+// ===== TRAVEL PAGE =====
+function renderTravel() {
+  const travelData = allData.filter(r=>r.category==='Путешествия');
+  const expVnd = travelData.filter(r=>r.type==='расход'&&r.currency==='VND').reduce((a,r)=>a+r.amount,0);
+  const expRub = travelData.filter(r=>r.type==='расход'&&r.currency==='RUB').reduce((a,r)=>a+r.amount,0);
+  const expVony = travelData.filter(r=>r.type==='путешествие'&&r.currency==='Воны').reduce((a,r)=>a+r.amount,0);
+  const expUsd = travelData.filter(r=>r.type==='расход'&&r.currency==='USDT').reduce((a,r)=>a+r.amount,0);
+  const txCount = travelData.length;
+  const days = travelData.length ? (() => {
+    const dates = [...new Set(travelData.map(r=>r.date))].sort();
+    if(dates.length<2) return 1;
+    return Math.round((new Date(dates[dates.length-1])-new Date(dates[0]))/(1000*60*60*24))+1;
+  })() : 0;
+
+  // By subcategory (comment-based) — or by date grouping
+  const byComment = {};
+  travelData.filter(r=>r.currency==='VND'||r.currency==='Воны').forEach(r=>{
+    const key = r.comment||'Другое';
+    if(!byComment[key]) byComment[key]={vnd:0,vony:0,cnt:0};
+    if(r.currency==='VND') byComment[key].vnd+=r.amount;
+    if(r.currency==='Воны') byComment[key].vony+=r.amount;
+    byComment[key].cnt++;
+  });
+
+  // Cat breakdown by what was bought
+  const catGroups = {};
+  travelData.forEach(r=>{
+    const cat = detectTravelCat(r.comment||r.category);
+    if(!catGroups[cat]) catGroups[cat]={vnd:0,vony:0,rub:0,usd:0,cnt:0};
+    if(r.currency==='VND') catGroups[cat].vnd+=r.amount;
+    else if(r.currency==='Воны') catGroups[cat].vony+=r.amount;
+    else if(r.currency==='RUB') catGroups[cat].rub+=r.amount;
+    else if(r.currency==='USDT') catGroups[cat].usd+=r.amount;
+    catGroups[cat].cnt++;
+  });
+  const catEntries = Object.entries(catGroups).sort((a,b)=>b[1].vnd+b[1].vony-a[1].vnd-a[1].vony);
+
+  const txRows = [...travelData].reverse();
+
+  const currPill = {VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd',Воны:'pill-vony'};
+
+  document.getElementById('travelContent').innerHTML = `
+    <div class="travel-header-card">
+      <div>
+        <h2>✈️ Путешествия</h2>
+        <p>${txCount} транзакций · ${days} дней</p>
+      </div>
+      <div class="travel-total">
+        ${expVnd?`<div class="travel-total-val">${Math.round(expVnd/1000).toLocaleString('ru')}к ₫</div>`:''}
+        ${expVony?`<div style="font-size:18px;font-weight:600;margin-top:2px">${Math.round(expVony).toLocaleString('ru')} ₩</div>`:''}
+        ${expRub?`<div style="font-size:16px;font-weight:500;margin-top:2px;opacity:0.85">${Math.round(expRub).toLocaleString('ru')} ₽</div>`:''}
+        ${expUsd?`<div style="font-size:16px;font-weight:500;margin-top:2px;opacity:0.85">${Math.round(expUsd).toLocaleString('ru')} $</div>`:''}
+        <div class="travel-total-label">Всего потрачено</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title travel">По категориям <span style="font-weight:400;font-size:10px;text-transform:none;letter-spacing:0">(нажми для деталей)</span></div>
+      <div class="card" style="padding:12px">
+        <table class="travel-cat-table">
+          <thead><tr><th>Категория</th><th>Транзакций</th><th style="text-align:right">₫</th><th style="text-align:right">₩</th><th style="text-align:right">₽</th></tr></thead>
+          <tbody>
+            ${catEntries.map(([cat,v])=>`
+              <tr class="travel-cat-row" onclick="openTravelCatModal('${cat.replace(/'/g,"\\'")}')">
+                <td>${cat}</td>
+                <td style="color:var(--stone-text)">${v.cnt}</td>
+                <td>${v.vnd?Math.round(v.vnd/1000).toLocaleString('ru')+'к':''}</td>
+                <td>${v.vony?Math.round(v.vony).toLocaleString('ru')+'₩':''}</td>
+                <td>${v.rub?Math.round(v.rub).toLocaleString('ru')+'₽':''}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title travel">Все транзакции <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">(${txRows.length})</span></div>
+      <div class="card" style="padding:12px">
+        <div style="overflow-x:auto">
+          <table class="tx-table">
+            <thead><tr><th>Дата</th><th>Кто</th><th style="text-align:right">Сумма</th><th>Валюта</th><th>Комментарий</th></tr></thead>
+            <tbody>
+              ${txRows.map(r=>`<tr>
+                <td style="color:var(--stone-text);white-space:nowrap">${r.datetime.slice(0,16)}</td>
+                <td>${r.who}</td>
+                <td style="text-align:right;font-weight:500">${Math.round(r.amount).toLocaleString('ru')}</td>
+                <td><span class="pill ${currPill[r.currency]||'pill-type'}">${r.currency}</span></td>
+                <td style="color:var(--stone-text)">${r.comment}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+}
+
+function detectTravelCat(comment) {
+  const c = (comment||'').toLowerCase();
+  if(/такси|метро|транспорт|автобус/.test(c)) return '🚕 Транспорт';
+  if(/кофе/.test(c)) return '☕ Кофе';
+  if(/кафе|ресторан|еда|завтрак|обед|ужин|чай|вода|сок|булочка|твистер/.test(c)) return '🍜 Еда и кафе';
+  if(/отель|хостел|жильё|квартира/.test(c)) return '🏨 Проживание';
+  if(/сувенир/.test(c)) return '🎁 Сувениры';
+  if(/очки|шопинг|магазин|одежда/.test(c)) return '🛍 Шопинг';
+  if(/симка|симка/.test(c)) return '📱 Связь';
+  if(/продукт/.test(c)) return '🛒 Продукты';
+  return '📦 Другое';
+}
+
+function openTravelCatModal(cat) {
+  const travelData = allData.filter(r=>r.category==='Путешествия');
+  const rows = travelData.filter(r=>detectTravelCat(r.comment||r.category)===cat).sort((a,b)=>b.date.localeCompare(a.date));
+  const totalVnd = rows.filter(r=>r.currency==='VND').reduce((a,r)=>a+r.amount,0);
+  const totalVony = rows.filter(r=>r.currency==='Воны').reduce((a,r)=>a+r.amount,0);
+  const parts=[];
+  if(totalVnd) parts.push(Math.round(totalVnd/1000).toLocaleString('ru')+'к ₫');
+  if(totalVony) parts.push(Math.round(totalVony).toLocaleString('ru')+' ₩');
+  const currPill = {VND:'pill-vnd',RUB:'pill-rub',USDT:'pill-usd',Воны:'pill-vony'};
+  document.getElementById('modalTitle').textContent = cat;
+  document.getElementById('modalTotal').textContent = `Итого: ${parts.join(' + ')} · ${rows.length} транзакций`;
+  document.getElementById('modalBody').innerHTML = rows.map(r=>`
+    <tr>
+      <td style="color:var(--stone-text);white-space:nowrap">${r.datetime.slice(0,16)}</td>
+      <td>${r.who}</td>
+      <td style="color:var(--stone-text)">${r.comment}</td>
+      <td><span class="pill ${currPill[r.currency]||'pill-type'}">${Math.round(r.amount).toLocaleString('ru')} ${r.currency==='VND'?'₫':r.currency==='Воны'?'₩':r.currency==='RUB'?'₽':'$'}</span></td>
+    </tr>`).join('') || '<tr><td colspan="4" class="status">нет транзакций</td></tr>';
+  document.getElementById('catModal').classList.add('open');
+}
+
+// ===== MAIN RENDER =====
 function render() {
-  renderBalances();
   renderIncome();
-  renderCatChart('cCatVnd','leg-vnd','VND');
-  renderCatChart('cCatRub','leg-rub','RUB');
+  renderCatChart('cCatVnd','leg-vnd','VND',COLORS);
+  renderCatChart('cCatRub','leg-rub','RUB',COLORS);
   renderCatTable();
   renderTopCats();
+  renderComparison();
   renderTable();
+  if(currentTab==='travel') renderTravel();
 }
 
 loadData();
