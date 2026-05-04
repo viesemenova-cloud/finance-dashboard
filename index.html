@@ -296,10 +296,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="section">
     <div class="section-title">Сравнение с прошлым месяцем</div>
     <div class="card">
-      <div class="cmp-period-toggle">
-        <button class="cmp-period-btn active" id="cmpBtnCurrent" onclick="setCmpMode('current')">Текущий месяц</button>
-        <button class="cmp-period-btn" id="cmpBtnFiltered" onclick="setCmpMode('filtered')">Свой период из фильтров</button>
-      </div>
       <div id="cmpContent"><div class="status">Загрузка...</div></div>
     </div>
   </div>
@@ -607,36 +603,12 @@ function getMonthRange(offset) {
 const MONTH_NAMES_RU = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 
 function renderComparison() {
-  let curFrom, curTo, prevFrom, prevTo, curLabel, prevLabel;
-
-  if(cmpMode==='current') {
-    const cur  = getMonthRange(0);   // текущий месяц (май)
-    const prev = getMonthRange(-1);  // прошлый месяц (апрель)
-    curFrom=cur.from;   curTo=cur.to;
-    prevFrom=prev.from; prevTo=prev.to;
-    curLabel  = MONTH_NAMES_RU[cur.month]  + ' ' + cur.year;
-    prevLabel = MONTH_NAMES_RU[prev.month] + ' ' + prev.year;
-  } else {
-    // Filtered mode — требует заданного периода в фильтрах
-    const from = document.getElementById('dateFrom').value;
-    const to   = document.getElementById('dateTo').value;
-    if(!from || !to) {
-      document.getElementById('cmpContent').innerHTML = `
-        <div style="padding:16px;color:var(--stone-text);font-size:13px;text-align:center">
-          Задай период в фильтрах выше (поля «С» и «По»),<br>тогда здесь покажется сравнение с таким же по длине периодом до него.
-        </div>`;
-      return;
-    }
-    curFrom=from; curTo=to;
-    // Предыдущий период — такая же длина, непосредственно перед curFrom
-    const durMs = new Date(to) - new Date(from);
-    const prevToDate   = new Date(new Date(from) - 24*60*60*1000); // день до from
-    const prevFromDate = new Date(prevToDate - durMs);
-    prevFrom = prevFromDate.toISOString().slice(0,10);
-    prevTo   = prevToDate.toISOString().slice(0,10);
-    curLabel  = `${curFrom} — ${curTo}`;
-    prevLabel = `${prevFrom} — ${prevTo}`;
-  }
+  const cur  = getMonthRange(0);
+  const prev = getMonthRange(-1);
+  const curFrom=cur.from, curTo=cur.to;
+  const prevFrom=prev.from, prevTo=prev.to;
+  const curLabel  = MONTH_NAMES_RU[cur.month]  + ' ' + cur.year;
+  const prevLabel = MONTH_NAMES_RU[prev.month] + ' ' + prev.year;
 
   // Только строгие расходы (тип = 'расход'), исключаем кэш/путешествие
   const onlyExp = r => r.type === 'расход';
