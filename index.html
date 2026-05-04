@@ -339,8 +339,8 @@ const TRAVEL_COLORS = ['#7B4F2E','#C4833A','#E0A870','#F5D5B0','#4A2E18','#A0603
 
 // Словарь валюта → страна (базовый, дополняется из Настроек)
 let currencyMap = {
-  'VND':'🇻🇳 Вьетнам','Донг':'🇻🇳 Вьетнам',
-  'Воны':'🇰🇷 Корея','KRW':'🇰🇷 Корея',
+  'VND':'🇻🇳 Вьетнам','Донг':'🇻🇳 Вьетнам','донг':'🇻🇳 Вьетнам',
+  'Воны':'🇰🇷 Корея','воны':'🇰🇷 Корея','KRW':'🇰🇷 Корея',
   'Юань':'🇨🇳 Китай','CNY':'🇨🇳 Китай',
   'Бат':'🇹🇭 Таиланд','THB':'🇹🇭 Таиланд',
   'Дирхам':'🇦🇪 ОАЭ/Дубай','AED':'🇦🇪 ОАЭ/Дубай',
@@ -722,13 +722,21 @@ function isTravelRow(r) {
 }
 
 function currencyToCountry(curr) {
-  return currencyMap[curr] || ('🌍 ' + curr);
+  if(!curr) return '🌍 ?';
+  // Сначала точное совпадение
+  if(currencyMap[curr]) return currencyMap[curr];
+  // Потом без учёта регистра
+  const lower = curr.toLowerCase();
+  const found = Object.keys(currencyMap).find(k => k.toLowerCase() === lower);
+  return found ? currencyMap[found] : ('🌍 ' + curr);
 }
+
+function isVony(curr) { return (curr||'').toLowerCase() === 'воны' || curr === 'KRW'; }
 
 function fmtAmount(r) {
   const amt = Math.round(r.amount).toLocaleString('ru');
   if(r.currency==='VND')  return Math.round(r.amount/1000).toLocaleString('ru')+'к ₫';
-  if(r.currency==='Воны') return amt+' ₩';
+  if(isVony(r.currency)) return amt+' ₩';
   if(r.currency==='RUB')  return amt+' ₽';
   if(r.currency==='USDT') return amt+' $';
   return amt+' '+r.currency;
@@ -791,7 +799,7 @@ function renderTravelContent() {
   });
 
   const expVnd  = travelData.filter(r=>r.currency==='VND').reduce((a,r)=>a+r.amount,0);
-  const expVony = travelData.filter(r=>r.currency==='Воны').reduce((a,r)=>a+r.amount,0);
+  const expVony = travelData.filter(r=>isVony(r.currency)).reduce((a,r)=>a+r.amount,0);
   const expRub  = travelData.filter(r=>r.currency==='RUB').reduce((a,r)=>a+r.amount,0);
   const expUsd  = travelData.filter(r=>r.currency==='USDT').reduce((a,r)=>a+r.amount,0);
 
@@ -805,7 +813,7 @@ function renderTravelContent() {
     const c = currencyToCountry(r.currency);
     if(!byCountry[c]) byCountry[c]={vnd:0,vony:0,rub:0,usd:0,cnt:0,dates:new Set()};
     if(r.currency==='VND')  byCountry[c].vnd+=r.amount;
-    if(r.currency==='Воны') byCountry[c].vony+=r.amount;
+    if(isVony(r.currency)) byCountry[c].vony+=r.amount;
     if(r.currency==='RUB')  byCountry[c].rub+=r.amount;
     if(r.currency==='USDT') byCountry[c].usd+=r.amount;
     byCountry[c].cnt++;
@@ -830,7 +838,7 @@ function renderTravelContent() {
     const cat = detectTravelCat(r.comment||r.category);
     if(!catGroups[cat]) catGroups[cat]={vnd:0,vony:0,rub:0,usd:0,cnt:0};
     if(r.currency==='VND')  catGroups[cat].vnd+=r.amount;
-    if(r.currency==='Воны') catGroups[cat].vony+=r.amount;
+    if(isVony(r.currency)) catGroups[cat].vony+=r.amount;
     if(r.currency==='RUB')  catGroups[cat].rub+=r.amount;
     if(r.currency==='USDT') catGroups[cat].usd+=r.amount;
     catGroups[cat].cnt++;
